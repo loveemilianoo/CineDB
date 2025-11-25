@@ -1,0 +1,13 @@
+entity\Pelicula.class
+com\mycompany\cinedb\resources\JakartaEE11Resource.class
+conexion\Main.class
+dao\BoletoDAO.class
+entity\Asiento.class
+entity\Transaccion.class
+entity\Boleto.class
+entity\DetalleProducto.class
+conexion\Conexion.class
+entity\Funcion.class
+com\mycompany\cinedb\JakartaRestConfiguration.class
+entity\Producto.class
+entity\Sala.class
