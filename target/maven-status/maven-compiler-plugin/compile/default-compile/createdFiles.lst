@@ -4,6 +4,7 @@ conexion\Main.class
 dao\BoletoDAO.class
 entity\Asiento.class
 entity\Transaccion.class
+dao\PeliculaDAO.class
 entity\Boleto.class
 entity\DetalleProducto.class
 conexion\Conexion.class

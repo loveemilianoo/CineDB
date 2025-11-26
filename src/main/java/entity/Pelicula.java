@@ -9,6 +9,8 @@ public class Pelicula {
     private String genero;
     private String clasificacion;
     
+    public Pelicula(){}
+    
     public Pelicula(int idPelicula, String titulo, Duration duracion, String genero, String clasificacion) {
         this.idPelicula = idPelicula;
         this.titulo = titulo;
