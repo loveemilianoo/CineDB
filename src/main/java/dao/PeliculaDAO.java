@@ -7,16 +7,16 @@ import java.time.Duration;
 import java.util.*;
 
 public class PeliculaDAO {
-    public void insetrtarPelicula(Pelicula pelicula){
+    
+    public void insertarPelicula(Pelicula pelicula){
         Connection conn = null;
         Conexion conexion = new Conexion();
         PreparedStatement ps = null;
-        ResultSet rs = null;
 
         try{
             conn = conexion.getConexion();
             String query = "INSERT INTO tablas.pelicula (titulo, duracion, genero, clasificacion) VALUES (?,?,?,?)";
-            ps = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            ps = conn.prepareStatement(query);
             
             String duracionPostgres = formatDurationToPostgres(pelicula.getDuracion());
             
@@ -24,23 +24,13 @@ public class PeliculaDAO {
             ps.setString(2, duracionPostgres);
             ps.setString(3, pelicula.getGenero());
             ps.setString(4, pelicula.getClasificacion());
-            
-            int filas = ps.executeUpdate();
-            if (filas > 0){
-                rs = ps.getGeneratedKeys();
-                if (rs.next()){
-                    int idPelicula = rs.getInt(1);
-                    pelicula.setIdPelicula(idPelicula);
-                    System.out.println("Pelicula Insertada!!");
-                }
-            }
-            
+            ps.executeUpdate();
+            System.out.println("Pelicula insertada!!");
         } catch (SQLException e){
             System.out.println("Error "+e.toString());
             e.printStackTrace();
         } finally {
             try{
-                if (rs != null) rs.close();
                 if (ps != null) ps.close();
                 if (conn != null) conn.close();
             } catch (SQLException e){

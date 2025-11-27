@@ -63,7 +63,6 @@
         
         <%
             PeliculaDAO dao = new PeliculaDAO();
-            // Necesitarás crear este método en tu DAO
             List<Pelicula> peliculas = dao.getPeliculas();
             
             if(peliculas.isEmpty()) {

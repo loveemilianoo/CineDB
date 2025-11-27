@@ -8,80 +8,21 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Agregar Nueva Película</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #333;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #555;
-        }
-        input[type="text"], input[type="number"], select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-            box-sizing: border-box;
-        }
-        .btn {
-            background-color: #4CAF50;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-right: 10px;
-        }
-        .btn-cancel {
-            background-color: #f44336;
-        }
-        .btn:hover {
-            opacity: 0.9;
-        }
-        .message {
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 4px;
-            text-align: center;
-        }
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        .duration-group {
-            display: flex;
-            gap: 10px;
-        }
-        .duration-group input {
-            flex: 1;
-        }
+        /* Tus estilos se mantienen igual */
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5; }
+        .container { background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #333; text-align: center; margin-bottom: 30px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        input[type="text"], input[type="number"], select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; box-sizing: border-box; }
+        .btn { background-color: #4CAF50; color: white; padding: 12px 24px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-right: 10px; }
+        .btn-cancel { background-color: #f44336; }
+        .btn:hover { opacity: 0.9; }
+        .message { padding: 10px; margin: 10px 0; border-radius: 4px; text-align: center; }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .duration-group { display: flex; gap: 10px; }
+        .duration-group input { flex: 1; }
     </style>
 </head>
 <body>
@@ -89,13 +30,26 @@
         <h1>🎬 Agregar Nueva Película</h1>
         
         <%
+            // DEBUG: Mostrar que el JSP se está ejecutando
+            System.out.println("🔄 JSP frmInsertarPelicula.jsp cargado");
+            
             // Procesar el formulario cuando se envía
             if ("POST".equalsIgnoreCase(request.getMethod())) {
+                System.out.println("📨 Formulario enviado por POST");
+                
                 String titulo = request.getParameter("titulo");
                 String horasStr = request.getParameter("horas");
                 String minutosStr = request.getParameter("minutos");
                 String genero = request.getParameter("genero");
                 String clasificacion = request.getParameter("clasificacion");
+                
+                // DEBUG: Mostrar parámetros
+                System.out.println("📊 Parámetros recibidos:");
+                System.out.println("   Título: " + titulo);
+                System.out.println("   Horas: " + horasStr);
+                System.out.println("   Minutos: " + minutosStr);
+                System.out.println("   Género: " + genero);
+                System.out.println("   Clasificación: " + clasificacion);
                 
                 try {
                     // Validar campos obligatorios
@@ -108,6 +62,8 @@
                         int minutos = Integer.parseInt(minutosStr);
                         Duration duracion = Duration.ofHours(horas).plusMinutes(minutos);
                         
+                        System.out.println("⏱️ Duración calculada: " + duracion);
+                        
                         // Crear objeto Pelicula
                         Pelicula pelicula = new Pelicula();
                         pelicula.setTitulo(titulo.trim());
@@ -115,9 +71,11 @@
                         pelicula.setGenero(genero.trim());
                         pelicula.setClasificacion(clasificacion);
                         
-                        // Insertar en la base de datos
+                        System.out.println("🔄 Llamando a PeliculaDAO...");
+                        
+                        // Insertar en la base de datos - ✅ NOMBRE CORREGIDO
                         PeliculaDAO dao = new PeliculaDAO();
-                        dao.insetrtarPelicula(pelicula);
+                        dao.insertarPelicula(pelicula);  // ✅ insertarPelicula (no insetrtarPelicula)
         %>
                         <div class="message success">
                             ✅ ¡Película "<%= titulo %>" agregada exitosamente!
@@ -129,6 +87,7 @@
                         </script>
         <%
                     } else {
+                        System.out.println("❌ Campos incompletos");
         %>
                         <div class="message error">
                             ❌ Por favor, completa todos los campos obligatorios.
@@ -136,6 +95,7 @@
         <%
                     }
                 } catch (Exception e) {
+                    System.out.println("❌ Error en JSP: " + e.getMessage());
         %>
                     <div class="message error">
                         ❌ Error al agregar la película: <%= e.getMessage() %>
@@ -150,7 +110,7 @@
             <div class="form-group">
                 <label for="titulo">Título de la Película *</label>
                 <input type="text" id="titulo" name="titulo" required 
-                       placeholder="Ej: Avengers: Endgame">
+                       placeholder="Ej: Avengers: Endgame" value="Película de Prueba">
             </div>
             
             <div class="form-group">
@@ -172,7 +132,7 @@
             <div class="form-group">
                 <label for="genero">Género *</label>
                 <input type="text" id="genero" name="genero" required 
-                       placeholder="Ej: Acción, Comedia, Drama">
+                       placeholder="Ej: Acción, Comedia, Drama" value="Acción">
             </div>
             
             <div class="form-group">
@@ -181,7 +141,7 @@
                     <option value="">Selecciona una clasificación</option>
                     <option value="G">G - Todo público</option>
                     <option value="PG">PG - Guía paternal sugerida</option>
-                    <option value="PG-13">PG-13 - Mayores de 13 años</option>
+                    <option value="PG-13" selected>PG-13 - Mayores de 13 años</option>  <!-- ✅ selected -->
                     <option value="R">R - Mayores de 17 años</option>
                     <option value="NC-17">NC-17 - Solo adultos</option>
                     <option value="A">A - Solo adultos</option>
@@ -194,32 +154,5 @@
             </div>
         </form>
     </div>
-    
-    <script>
-        // Validación adicional del lado del cliente
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const titulo = document.getElementById('titulo').value.trim();
-            const genero = document.getElementById('genero').value.trim();
-            const clasificacion = document.getElementById('clasificacion').value;
-            
-            if (!titulo) {
-                alert('Por favor ingresa el título de la película');
-                e.preventDefault();
-                return;
-            }
-            
-            if (!genero) {
-                alert('Por favor ingresa el género de la película');
-                e.preventDefault();
-                return;
-            }
-            
-            if (!clasificacion) {
-                alert('Por favor selecciona una clasificación');
-                e.preventDefault();
-                return;
-            }
-        });
-    </script>
 </body>
 </html>
