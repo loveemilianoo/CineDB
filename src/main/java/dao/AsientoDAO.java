@@ -121,11 +121,10 @@ public class AsientoDAO {
         return asiento;
     }
     
-    public boolean insertarAsiento(Asiento asiento) {
+    public void insertarAsiento(Asiento asiento) {
         Conexion conn = new Conexion();
         Connection conexion = null;
         PreparedStatement ps = null;
-        boolean resultado = false;
         
         try {
             conexion = conn.getConexion();
@@ -135,8 +134,7 @@ public class AsientoDAO {
             ps.setInt(2, asiento.getNumeroAsiento());
             ps.setInt(3, asiento.getIdSala());
             
-            int filasAfectadas = ps.executeUpdate();
-            resultado = (filasAfectadas > 0);
+            ps.executeUpdate();
             
         } catch (Exception e) {
             e.printStackTrace();
@@ -149,14 +147,12 @@ public class AsientoDAO {
                 System.out.println("Error al cerrar recursos " + e.toString());
             }
         }
-        return resultado;
     }
     
-    public boolean actualizarAsiento(Asiento asiento) {
+    public void actualizarAsiento(Asiento asiento) {
         Conexion conn = new Conexion();
         Connection conexion = null;
         PreparedStatement ps = null;
-        boolean resultado = false;
         
         try {
             conexion = conn.getConexion();
@@ -167,8 +163,7 @@ public class AsientoDAO {
             ps.setInt(3, asiento.getIdSala());
             ps.setInt(4, asiento.getIdAsiento());
             
-            int filasAfectadas = ps.executeUpdate();
-            resultado = (filasAfectadas > 0);
+            ps.executeUpdate();
             
         } catch (Exception e) {
             e.printStackTrace();
@@ -181,14 +176,12 @@ public class AsientoDAO {
                 System.out.println("Error al cerrar recursos " + e.toString());
             }
         }
-        return resultado;
     }
     
-    public boolean eliminarAsiento(int idAsiento) {
+    public void eliminarAsiento(int idAsiento) {
         Conexion conn = new Conexion();
         Connection conexion = null;
         PreparedStatement ps = null;
-        boolean resultado = false;
         
         try {
             conexion = conn.getConexion();
@@ -196,8 +189,7 @@ public class AsientoDAO {
             ps = conexion.prepareStatement(query);
             ps.setInt(1, idAsiento);
             
-            int filasAfectadas = ps.executeUpdate();
-            resultado = (filasAfectadas > 0);
+            ps.executeUpdate();
             
         } catch (Exception e) {
             e.printStackTrace();
@@ -210,16 +202,14 @@ public class AsientoDAO {
                 System.out.println("Error al cerrar recursos " + e.toString());
             }
         }
-        return resultado;
     }
     
     // Verificacion si esta ocupado
-    public boolean estaAsientoOcupado(int idAsiento, int idFuncion) {
+    public void estaAsientoOcupado(int idAsiento, int idFuncion) {
         Conexion conn = new Conexion();
         Connection conexion = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
-        boolean ocupado = false;
         
         try {
             conexion = conn.getConexion();
@@ -230,7 +220,7 @@ public class AsientoDAO {
             rs = ps.executeQuery();
             
             if (rs.next()) {
-                ocupado = (rs.getInt(1) > 0);
+                int count = rs.getInt(1);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -244,7 +234,6 @@ public class AsientoDAO {
                 System.out.println("Error al cerrar recursos " + e.toString());
             }
         }
-        return ocupado;
     }
     
     // Método adicional: obtener asientos disponibles por función
