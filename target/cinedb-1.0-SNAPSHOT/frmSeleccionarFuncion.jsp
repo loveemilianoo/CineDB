@@ -1,4 +1,3 @@
-<%@page import="java.time.Duration"%>
 <%@page import="dao.FuncionDAO"%>
 <%@page import="entity.Funcion"%>
 <%@page import="java.util.List"%>
@@ -26,30 +25,30 @@
     
     <% if (funciones.isEmpty()) { %>
         <p>No hay funciones disponibles para esta película.</p>
+        <a href="frmSeleccionarPelicula.jsp">← Volver a Películas</a>
     <% } else { %>
         <div class="funciones-container">
             <% for (Funcion funcion : funciones) { %>
-                <div class="funcion-card">
+                <div class="funcion-card" style="border: 1px solid #ccc; padding: 15px; margin: 10px;">
                     <h3>Sala <%= funcion.getSala().getNumeroSala() %></h3>
                     <p><strong>Fecha:</strong> <%= funcion.getFecha() %></p>
                     <p><strong>Hora:</strong> 
                         <%
-                            Duration horaInicio = funcion.getHoraInicio();
+                            java.time.Duration horaInicio = funcion.getHoraInicio();
                             long horas = horaInicio.toHours();
                             long minutos = horaInicio.toMinutesPart();
                             out.print(String.format("%02d:%02d", horas, minutos));
                         %>
                     </p>
                     
-                    <form action="seleccionarAsiento.jsp" method="GET">
+                    <!-- ✅ CORRECTO: Pasa a frmSeleccionarAsiento.jsp (debes crearlo) -->
+                    <form action="frmSeleccionarAsiento.jsp" method="GET">
                         <input type="hidden" name="idFuncion" value="<%= funcion.getIdFuncion() %>">
                         <input type="hidden" name="idPelicula" value="<%= idPelicula %>">
                         <input type="hidden" name="tituloPelicula" value="<%= tituloPelicula %>">
                         <input type="hidden" name="fechaFuncion" value="<%= funcion.getFecha() %>">
-                        <input type="hidden" name="horaFuncion" value="<%= String.format("%02d:%02d", 
-                            funcion.getHoraInicio().toHours(), 
-                            funcion.getHoraInicio().toMinutesPart()) %>">
-                        <input type="hidden" name="sala" value="<%= funcion.getSala().getNumeroSala() %>">
+                        <input type="hidden" name="horaFuncion" value="<%= String.format("%02d:%02d", horas, minutos) %>">
+                        <input type="hidden" name="numeroSala" value="<%= funcion.getSala().getNumeroSala() %>">
                         <button type="submit">Seleccionar Asientos</button>
                     </form>
                 </div>
@@ -60,6 +59,7 @@
         <p>Error: No se especificó la película.</p>
     <% } %>
     
-    <a href="seleccionarPelicula.jsp">← Volver a Películas</a>
+    <br>
+    <a href="frmSeleccionarPelicula.jsp">← Volver a Películas</a>
 </body>
 </html>
