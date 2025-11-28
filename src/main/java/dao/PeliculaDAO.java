@@ -8,7 +8,7 @@ import java.util.*;
 
 public class PeliculaDAO {
     
-    public void insertarPelicula(Pelicula pelicula){
+    public void insertarPeliculas(Pelicula pelicula){
         Connection conn = null;
         Conexion conexion = new Conexion();
         PreparedStatement ps = null;
