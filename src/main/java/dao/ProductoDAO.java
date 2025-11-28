@@ -1,35 +1,35 @@
 package dao;
 
 import conexion.Conexion;
-import entity.Asiento;
-import entity.Sala;
+import entity.Producto;
 import java.sql.*;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AsientoDAO {
+public class ProductoDAO {
     
-    public List<Asiento> getAsientos() {
+    public List<Producto> getProductos() {
         Conexion conn = new Conexion();
         Connection conexion = null;
-        List<Asiento> asientos = new ArrayList<>();
+        List<Producto> productos = new ArrayList<>();
         PreparedStatement ps = null;
         ResultSet rs = null;
-        //Verificar si son necesarios los ORDER BY
+        
         try {
             conexion = conn.getConexion();
-            String query = "SELECT * FROM tablas.asiento ORDER BY id_asiento ASC";//UNO
+            String query = "SELECT * FROM tablas.producto ORDER BY id_producto ASC";//Verificar si va ORDER BY
             ps = conexion.prepareStatement(query);
             rs = ps.executeQuery();
             
             while (rs.next()) {
-                Asiento asiento = new Asiento(
-                    rs.getInt("id_asiento"),
-                    rs.getString("fila").charAt(0), 
-                    rs.getInt("numero_asiento"),
-                    rs.getInt("id_sala")
+                Producto producto = new Producto(
+                    rs.getInt("id_producto"),
+                    rs.getString("nombre"),
+                    rs.getBigDecimal("precio_venta"),
+                    rs.getInt("stock")
                 );
-                asientos.add(asiento);
+                productos.add(producto);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -43,31 +43,30 @@ public class AsientoDAO {
                 System.out.println("Error al cerrar recursos " + e.toString());
             }
         }
-        return asientos;
+        return productos;
     }
     
-    public List<Asiento> getAsientosPorSala(int idSala) {
+    public List<Producto> getProductosConStock() {
         Conexion conn = new Conexion();
         Connection conexion = null;
-        List<Asiento> asientos = new ArrayList<>();
+        List<Producto> productos = new ArrayList<>();
         PreparedStatement ps = null;
         ResultSet rs = null;
         
         try {
             conexion = conn.getConexion();
-            String query = "SELECT * FROM tablas.asiento WHERE id_sala = ? ORDER BY fila, numero_asiento ASC";//Dos
+            String query = "SELECT * FROM tablas.producto WHERE stock > 0 ORDER BY nombre ASC";//Verificar ORDER BY
             ps = conexion.prepareStatement(query);
-            ps.setInt(1, idSala);
             rs = ps.executeQuery();
             
             while (rs.next()) {
-                Asiento asiento = new Asiento(
-                    rs.getInt("id_asiento"),
-                    rs.getString("fila").charAt(0),
-                    rs.getInt("numero_asiento"),
-                    rs.getInt("id_sala")
+                Producto producto = new Producto(
+                    rs.getInt("id_producto"),
+                    rs.getString("nombre"),
+                    rs.getBigDecimal("precio_venta"),
+                    rs.getInt("stock")
                 );
-                asientos.add(asiento);
+                productos.add(producto);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -81,29 +80,29 @@ public class AsientoDAO {
                 System.out.println("Error al cerrar recursos " + e.toString());
             }
         }
-        return asientos;
+        return productos;
     }
     
-    public Asiento getAsientoPorId(int idAsiento) {
+    public Producto getProductoPorId(int idProducto) {
         Conexion conn = new Conexion();
         Connection conexion = null;
-        Asiento asiento = null;
+        Producto producto = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
         
         try {
             conexion = conn.getConexion();
-            String query = "SELECT * FROM tablas.asiento WHERE id_asiento = ?";
+            String query = "SELECT * FROM tablas.producto WHERE id_producto = ?";
             ps = conexion.prepareStatement(query);
-            ps.setInt(1, idAsiento);
+            ps.setInt(1, idProducto);
             rs = ps.executeQuery();
             
             if (rs.next()) {
-                asiento = new Asiento(
-                    rs.getInt("id_asiento"),
-                    rs.getString("fila").charAt(0),
-                    rs.getInt("numero_asiento"),
-                    rs.getInt("id_sala")
+                producto = new Producto(
+                    rs.getInt("id_producto"),
+                    rs.getString("nombre"),
+                    rs.getBigDecimal("precio_venta"),
+                    rs.getInt("stock")
                 );
             }
         } catch (Exception e) {
@@ -118,21 +117,21 @@ public class AsientoDAO {
                 System.out.println("Error al cerrar recursos " + e.toString());
             }
         }
-        return asiento;
+        return producto;
     }
     
-    public void insertarAsiento(Asiento asiento) {
+    public void insertarProducto(Producto producto) {
         Conexion conn = new Conexion();
         Connection conexion = null;
         PreparedStatement ps = null;
         
         try {
             conexion = conn.getConexion();
-            String query = "INSERT INTO tablas.asiento (fila, numero_asiento, id_sala) VALUES (?, ?, ?)";
+            String query = "INSERT INTO tablas.producto (nombre, precio_venta, stock) VALUES (?, ?, ?)";
             ps = conexion.prepareStatement(query);
-            ps.setString(1, String.valueOf(asiento.getFila())); 
-            ps.setInt(2, asiento.getNumeroAsiento());
-            ps.setInt(3, asiento.getIdSala());
+            ps.setString(1, producto.getNombre());
+            ps.setBigDecimal(2, producto.getPrecioVenta());
+            ps.setInt(3, producto.getStock());
             
             ps.executeUpdate();
             
@@ -149,19 +148,19 @@ public class AsientoDAO {
         }
     }
     
-    public void actualizarAsiento(Asiento asiento) {
+    public void actualizarProducto(Producto producto) {
         Conexion conn = new Conexion();
         Connection conexion = null;
         PreparedStatement ps = null;
         
         try {
             conexion = conn.getConexion();
-            String query = "UPDATE tablas.asiento SET fila = ?, numero_asiento = ?, id_sala = ? WHERE id_asiento = ?";
+            String query = "UPDATE tablas.producto SET nombre = ?, precio_venta = ?, stock = ? WHERE id_producto = ?";
             ps = conexion.prepareStatement(query);
-            ps.setString(1, String.valueOf(asiento.getFila()));
-            ps.setInt(2, asiento.getNumeroAsiento());
-            ps.setInt(3, asiento.getIdSala());
-            ps.setInt(4, asiento.getIdAsiento());
+            ps.setString(1, producto.getNombre());
+            ps.setBigDecimal(2, producto.getPrecioVenta());
+            ps.setInt(3, producto.getStock());
+            ps.setInt(4, producto.getIdProducto());
             
             ps.executeUpdate();
             
@@ -178,16 +177,16 @@ public class AsientoDAO {
         }
     }
     
-    public void eliminarAsiento(int idAsiento) {
+    public void eliminarProducto(int idProducto) {
         Conexion conn = new Conexion();
         Connection conexion = null;
         PreparedStatement ps = null;
         
         try {
             conexion = conn.getConexion();
-            String query = "DELETE FROM tablas.asiento WHERE id_asiento = ?";
+            String query = "DELETE FROM tablas.producto WHERE id_producto = ?";
             ps = conexion.prepareStatement(query);
-            ps.setInt(1, idAsiento);
+            ps.setInt(1, idProducto);
             
             ps.executeUpdate();
             
@@ -204,66 +203,57 @@ public class AsientoDAO {
         }
     }
     
-    // Verificacion si esta ocupado
-    public void estaAsientoOcupado(int idAsiento, int idFuncion) {
+    // Método para actualizar el stock del producto
+    public void actualizarStock(int idProducto, int nuevoStock) {
         Conexion conn = new Conexion();
         Connection conexion = null;
+        PreparedStatement ps = null;
+        
+        try {
+            conexion = conn.getConexion();
+            String query = "UPDATE tablas.producto SET stock = ? WHERE id_producto = ?";
+            ps = conexion.prepareStatement(query);
+            ps.setInt(1, nuevoStock);
+            ps.setInt(2, idProducto);
+            
+            ps.executeUpdate();
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error " + e.toString());
+        } finally {
+            try {
+                if (ps != null) ps.close();
+                if (conexion != null) conexion.close();
+            } catch (SQLException e) {
+                System.out.println("Error al cerrar recursos " + e.toString());
+            }
+        }
+    }
+    
+    // Método para buscar productos por nombre
+    public List<Producto> buscarProductosPorNombre(String nombre) {
+        Conexion conn = new Conexion();
+        Connection conexion = null;
+        List<Producto> productos = new ArrayList<>();
         PreparedStatement ps = null;
         ResultSet rs = null;
         
         try {
             conexion = conn.getConexion();
-            String query = "SELECT COUNT(*) FROM tablas.boleto WHERE id_asiento = ? AND id_funcion = ?";
+            String query = "SELECT * FROM tablas.producto WHERE nombre LIKE ? ORDER BY nombre ASC";//Verificar si ORDER BY
             ps = conexion.prepareStatement(query);
-            ps.setInt(1, idAsiento);
-            ps.setInt(2, idFuncion);
-            rs = ps.executeQuery();
-            
-            if (rs.next()) {
-                int count = rs.getInt(1);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Error " + e.toString());
-        } finally {
-            try {
-                if (rs != null) rs.close();
-                if (ps != null) ps.close();
-                if (conexion != null) conexion.close();
-            } catch (SQLException e) {
-                System.out.println("Error al cerrar recursos " + e.toString());
-            }
-        }
-    }
-    
-    // Método adicional: obtener asientos disponibles por función
-    public List<Asiento> getAsientosDisponiblesPorFuncion(int idFuncion, int idSala) {
-        Conexion conn = new Conexion();
-        Connection conexion = null;
-        List<Asiento> asientosDisponibles = new ArrayList<>();
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        
-        try {
-            conexion = conn.getConexion();
-            // Asientos de la sala que NO están en boletos para esta función
-            String query = "SELECT a.* FROM tablas.asiento a " +
-                          "WHERE a.id_sala = ? AND a.id_asiento NOT IN " +
-                          "(SELECT b.id_asiento FROM tablas.boleto b WHERE b.id_funcion = ?) " +
-                          "ORDER BY a.fila, a.numero_asiento";//TRES
-            ps = conexion.prepareStatement(query);
-            ps.setInt(1, idSala);
-            ps.setInt(2, idFuncion);
+            ps.setString(1, "%" + nombre + "%");
             rs = ps.executeQuery();
             
             while (rs.next()) {
-                Asiento asiento = new Asiento(
-                    rs.getInt("id_asiento"),
-                    rs.getString("fila").charAt(0),
-                    rs.getInt("numero_asiento"),
-                    rs.getInt("id_sala")
+                Producto producto = new Producto(
+                    rs.getInt("id_producto"),
+                    rs.getString("nombre"),
+                    rs.getBigDecimal("precio_venta"),
+                    rs.getInt("stock")
                 );
-                asientosDisponibles.add(asiento);
+                productos.add(producto);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -277,6 +267,40 @@ public class AsientoDAO {
                 System.out.println("Error al cerrar recursos " + e.toString());
             }
         }
-        return asientosDisponibles;
+        return productos;
+    }
+    
+    // Método para verificar si hay suficiente stock
+    public boolean verificarStockSuficiente(int idProducto, int cantidadRequerida) {
+        Conexion conn = new Conexion();
+        Connection conexion = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        boolean stockSuficiente = false;
+        
+        try {
+            conexion = conn.getConexion();
+            String query = "SELECT stock FROM tablas.producto WHERE id_producto = ? AND stock >= ?";
+            ps = conexion.prepareStatement(query);
+            ps.setInt(1, idProducto);
+            ps.setInt(2, cantidadRequerida);
+            rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                stockSuficiente = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error " + e.toString());
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (ps != null) ps.close();
+                if (conexion != null) conexion.close();
+            } catch (SQLException e) {
+                System.out.println("Error al cerrar recursos " + e.toString());
+            }
+        }
+        return stockSuficiente;
     }
 }
