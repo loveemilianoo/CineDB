@@ -1,4 +1,4 @@
-package com.mycompany.cinedb.dao;
+/*package com.mycompany.cinedb.dao;
 
 import com.mycompany.cinedb.conexion.Conexion;
 import com.mycompany.cinedb.entity.Sala;
@@ -104,3 +104,4 @@ public class SalaDAO {
         }
     }
 }
+*/
