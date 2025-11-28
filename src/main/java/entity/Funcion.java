@@ -11,7 +11,8 @@ public class Funcion {
     private Duration horaInicio;
     private Pelicula pelicula; 
     private Sala sala; 
-    
+
+    public Funcion() {}
     public Funcion(int idFuncion, int idPelicula, int idSala, LocalDate fecha, Duration horaInicio) {
         this.idFuncion = idFuncion;
         this.idPelicula = idPelicula;
@@ -19,7 +20,7 @@ public class Funcion {
         this.fecha = fecha;
         this.horaInicio = horaInicio;
     }
-    
+
     public int getIdFuncion() { return idFuncion; }
     public void setIdFuncion(int idFuncion) { this.idFuncion = idFuncion; }
     
