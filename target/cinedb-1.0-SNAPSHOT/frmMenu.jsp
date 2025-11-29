@@ -13,7 +13,7 @@
     <style>
       .hero-section {
         color: white;
-        padding: 80px 0;
+        padding: 150px 0;
       }
       .action-card {
         transition: transform 0.3s, box-shadow 0.3s;
@@ -63,7 +63,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
       <div class="container">
         <a class="navbar-brand" href="frmMenu.jsp">
-          <i class="fa-solid fa-film me-2"></i>Cine Prototype
+          <i class="fa-solid fa-film me-2"></i>Cine
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
@@ -79,10 +79,10 @@
       </div>
     </nav>
 
-    <header class="hero-section text-center position-relative" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <header class="hero-section text-center position-relative" style="background: linear-gradient(125deg, #667eea 0%, #764ba2 100%);">
       <div class="container position-relative" style="z-index: 1;">
-        <h1 class="display-4 fw-bold mb-4">Cine Prototype</h1>
-        <p class="lead mb-5">Tu experiencia cinematográfica perfecta comienza aquí</p>
+        <h1 class="display-4 fw-bold mb-4">Sistema Cine</h1>
+        <p class="lead mb-5">Sistema de gestion </p>
       </div>
     </header>
 
@@ -157,96 +157,6 @@
           </div>
         </div>
       </section>
-
-      <!-- Cartelera Rápida -->
-      <section class="row g-4">
-        <div class="col-12">
-          <h2 class="text-center section-title">Cartelera Destacada</h2>
-        </div>
-        <%
-            PeliculaDAO peliculaDAO = new PeliculaDAO();
-            List<Pelicula> peliculas = peliculaDAO.getPeliculas();
-            
-            int count = 0;
-            for (Pelicula pelicula : peliculas) {
-                if (count >= 3) break;
-        %>
-        <div class="col-md-4">
-          <div class="card movie-card shadow-sm">
-            <div style="height: 200px; background: linear-gradient(45deg, #<?= String.format("%06x", (int)(Math.random() * 0xFFFFFF)) %>, #<?= String.format("%06x", (int)(Math.random() * 0xFFFFFF)) %>); display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem;">
-              <i class="fa-solid fa-film"></i>
-            </div>
-            <div class="card-body text-center">
-              <h5 class="card-title"><%= pelicula.getTitulo() %></h5>
-              <p class="card-text text-muted small">
-                <%= pelicula.getGenero() %> • 
-                <%
-                    java.time.Duration duracion = pelicula.getDuracion();
-                    long horas = duracion.toHours();
-                    long minutos = duracion.toMinutesPart();
-                    out.print(horas + "h " + minutos + "m");
-                %>
-              </p>
-              <div class="d-grid gap-2">
-                <a href="frmSeleccionarPelicula.jsp" class="btn btn-outline-primary btn-sm">
-                  <i class="fa-solid fa-ticket me-1"></i>Comprar Boleto
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-        <%
-                count++;
-            }
-            
-            if (peliculas.isEmpty()) {
-        %>
-        <div class="col-12 text-center">
-          <div class="alert alert-info">
-            <i class="fa-solid fa-info-circle me-2"></i>
-            No hay películas en cartelera en este momento.
-            <a href="frmListadoPeliculas.jsp" class="alert-link">Agregar películas</a>
-          </div>
-        </div>
-        <%
-            }
-        %>
-      </section>
-
-      <!-- Estadísticas Rápidas -->
-      <section class="row g-4 mt-5">
-        <div class="col-12">
-          <div class="bg-light p-4 rounded-3">
-            <div class="row text-center">
-              <div class="col-md-3">
-                <h4 class="text-primary mb-1">
-                  <i class="fa-solid fa-film me-2"></i><%= peliculas.size() %>
-                </h4>
-                <p class="mb-0 text-muted">Películas en Cartelera</p>
-              </div>
-              <div class="col-md-3">
-                <h4 class="text-success mb-1">
-                  <i class="fa-solid fa-ticket me-2"></i>+
-                </h4>
-                <p class="mb-0 text-muted">Boletos Vendidos</p>
-              </div>
-              <div class="col-md-3">
-                <h4 class="text-warning mb-1">
-                  <i class="fa-solid fa-star me-2"></i>4.8
-                </h4>
-                <p class="mb-0 text-muted">Calificación</p>
-              </div>
-              <div class="col-md-3">
-                <h4 class="text-info mb-1">
-                  <i class="fa-solid fa-users me-2"></i>100%
-                </h4>
-                <p class="mb-0 text-muted">Clientes Satisfechos</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </main>
 
     <footer class="bg-dark text-white py-4 mt-5">
       <div class="container">
