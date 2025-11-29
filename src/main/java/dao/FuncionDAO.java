@@ -116,4 +116,53 @@ public class FuncionDAO {
         }
     }
 
+    private String formatDurationPostgres(Duration duration) {
+        if (duration == null) {
+            return "00:00:00";
+        }
+        long seconds = duration.getSeconds();
+        long absSeconds = Math.abs(seconds);
+        return String.format(
+                "%02d:%02d:%02d",
+                absSeconds / 3600,
+                (absSeconds % 3600) / 60,
+                absSeconds % 60);
+    }
+
+    public void insertarFuncion(int idPelicula, int idSala, Funcion funcion) {
+        Connection conn = null;
+        Conexion conexion = new Conexion();
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            conn = conexion.getConexion();
+
+            String query = "INSERT INTO tablas.funcion (id_pelicula, id_sala, fecha, hora_inicio) VALUES (?,?,?,?)";
+            ps = conn.prepareStatement(query);
+            ps.setInt(1, idPelicula);
+            ps.setInt(2, idSala);
+            ps.setDate(3, java.sql.Date.valueOf(funcion.getFecha()));
+
+            String horaInicio = formatDurationPostgres(funcion.getHoraInicio());
+
+            ps.setString(4, horaInicio);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            System.out.println("Error " + e.toString());
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null)
+                    rs.close();
+                if (ps != null)
+                    ps.close();
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException e) {
+                System.out.println("Error al cerrar recursos " + e.toString());
+            }
+        }
+    }
+
 }

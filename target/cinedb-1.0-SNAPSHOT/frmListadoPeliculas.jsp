@@ -66,7 +66,8 @@
     </header>
 
     <main class="container my-5">
-      <!-- Encabezado con acciones -->
+        
+      <!-- Encabezado -->
       <div class="row align-items-center mb-4">
         <div class="col-md-6">
           <h2 class="section-title mb-0">Catálogo de Películas</h2>
@@ -162,6 +163,10 @@
                               onclick="editarPelicula(<%= pelicula.getIdPelicula() %>)">
                         <i class="fa-solid fa-pen-to-square me-1"></i>Editar
                       </button>
+                      <button class="btn btn-outline-info" 
+                              onclick="gestionarFunciones(<%= pelicula.getIdPelicula() %>, '<%= pelicula.getTitulo() %>')">
+                        <i class="fa-solid fa-calendar-plus me-1"></i>Funciones
+                      </button>
                       <button class="btn btn-outline-danger" 
                               onclick="confirmarEliminacion(<%= pelicula.getIdPelicula() %>, '<%= pelicula.getTitulo() %>')">
                         <i class="fa-solid fa-trash me-1"></i>Eliminar
@@ -179,13 +184,12 @@
         </div>
       </div>
 
-      <!-- Resumen y acciones adicionales -->
+      <!--  -->
       <div class="row mt-4">
         <div class="col-md-6">
           <div class="d-flex align-items-center">
             <span class="text-muted me-3">
-              <i class="fa-solid fa-film me-1"></i>Total de películas: 
-              <strong class="text-dark"><%= peliculas.size() %></strong>
+             
             </span>
           </div>
         </div>
@@ -206,8 +210,8 @@
       <div class="container">
         <div class="row align-items-center">
           <div class="col-md-6">
-            <h5><i class="fa-solid fa-film me-2"></i>Cine Prototype</h5>
-            <p class="mb-0">Sistema de gestión cinematográfica</p>
+            <h5><i class="fa-solid fa-film me-2"></i>Sistema de Cine</h5>
+            <p class="mb-0">Sistema de gestión</p>
           </div>
           <div class="col-md-6 text-end">
             <div class="btn-group" role="group">
@@ -224,9 +228,7 @@
           </div>
         </div>
         <hr class="my-3">
-        <div class="text-center">
-          <p class="mb-0">© 2024 Cine Prototype. Sistema desarrollado con Java JSP y PostgreSQL</p>
-        </div>
+        
       </div>
     </footer>
 
@@ -244,6 +246,11 @@
         alert(`Editando película con ID: ${id} (funcionalidad en desarrollo)`);
         // Aquí iría la lógica real de edición
         // window.location.href = 'frmEditarPelicula.jsp?id=' + id;
+      }
+      
+      function gestionarFunciones(idPelicula, titulo) {
+        // Redirigir al formulario de agregar función con el ID de la película
+        window.location.href = 'frmAgregarFuncionSala.jsp?idPelicula=' + idPelicula + '&titulo=' + encodeURIComponent(titulo);
       }
     </script>
   </body>

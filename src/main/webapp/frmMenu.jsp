@@ -13,7 +13,7 @@
     <style>
       .hero-section {
         color: white;
-        padding: 150px 0;
+        padding: 15px 0;
       }
       .action-card {
         transition: transform 0.3s, box-shadow 0.3s;
@@ -147,8 +147,6 @@
                 <ul class="dropdown-menu w-100">
                   <li><a class="dropdown-item" href="frmListadoPeliculas.jsp"><i class="fa-solid fa-film me-2"></i>Gestionar Películas</a></li>
                   <li><a class="dropdown-item" href="#"><i class="fa-solid fa-tags me-2"></i>Gestionar Productos</a></li>
-                  <li><a class="dropdown-item" href="#"><i class="fa-solid fa-calendar me-2"></i>Gestionar Funciones</a></li>
-                  <li><a class="dropdown-item" href="frmListadoBoletos.jsp"><i class="fa-solid fa-ticket me-2"></i>Ver Boletos</a></li>
                   <li><hr class="dropdown-divider"></li>
                   <li><a class="dropdown-item" href="#"><i class="fa-solid fa-chart-bar me-2"></i>Reportes</a></li>
                 </ul>
