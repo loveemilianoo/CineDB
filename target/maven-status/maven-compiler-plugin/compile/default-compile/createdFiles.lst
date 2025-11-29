@@ -1,7 +1,9 @@
 entity\Pelicula.class
 com\mycompany\cinedb\resources\JakartaEE11Resource.class
 dao\AsientoDAO.class
+dao\TransaccionDAO.class
 conexion\Main.class
+dao\DetalleProductoDAO.class
 dao\BoletoDAO.class
 entity\Asiento.class
 dao\FuncionDAO.class
