@@ -183,8 +183,10 @@
                          class="btn btn-outline-info">
                         <i class="fa-solid fa-calendar-plus me-1"></i>Funciones
                       </a>
-                      <a href="EliminarPeliculaServlet?id=<%= pelicula.getIdPelicula() %>" class="btn btn-outline-danger">
-                        <i class="fa-solid fa-trash me-1"></i>Eliminar
+                      <a href="frmListadoPeliculas.jsp?action=delete&id=<%= pelicula.getIdPelicula() %>" 
+                        class="btn btn-outline-danger"
+                        onclick="return confirm('¿Estás seguro de que deseas eliminar la película <%= pelicula.getTitulo() %>?')">
+                      <i class="fa-solid fa-trash me-1"></i>Eliminar
                       </a>
                     </div>
                   </td>
