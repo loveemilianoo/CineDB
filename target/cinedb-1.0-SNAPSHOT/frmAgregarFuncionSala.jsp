@@ -91,12 +91,15 @@
                                         <label for="sala" class="form-label fw-bold">Sala</label>
                                         <select id="sala" name="idSala" class="form-select" required>
                                             <option value="">-- Seleccionar Sala --</option>
-                                            <% SalaDAO salaDAO=new SalaDAO(); List<Sala> salas = salaDAO.getSalas();
+                                            <% SalaDAO dao=new SalaDAO(); 
+                                                List<Sala> salas = dao.getSalas();
                                                 for (Sala sala : salas) {
-                                                %>
-                                                <option value="<%= sala.getIdSala() %>">Sala <%= sala.getNumeroSala() %>
-                                                        (Capacidad: <%= sala.getCapacidad() %>)</option>
-                                                <% } %>
+                                                System.out.println("Sala: " + sala.getNumeroSala() + " - Capacidad: " + sala.getCapacidad());
+                                            %>
+                                            <option value="<%= sala.getIdSala() %>">
+                                            Sala <%= sala.getNumeroSala() %> (Capacidad: <%= sala.getCapacidad() %>)
+                                            </option>
+                                            <% } %>
                                         </select>
                                     </div>
 

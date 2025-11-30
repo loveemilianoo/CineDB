@@ -17,7 +17,7 @@ public class SalaDAO {
 
         try {
             conexion = conn.getConexion();
-            String query = "SELECT * FROM sala ORDER BY id_sala ASC";
+            String query = "SELECT * FROM tablas.sala ORDER BY id_sala ASC";
             ps = conexion.prepareStatement(query);
             rs = ps.executeQuery();
 
@@ -55,7 +55,7 @@ public class SalaDAO {
 
         try {
             conexion = conn.getConexion();
-            String query = "SELECT * FROM sala WHERE id_sala = ?";
+            String query = "SELECT * FROM tablas.sala WHERE id_sala = ?";
             ps = conexion.prepareStatement(query);
             ps.setInt(1, idSala);
             rs = ps.executeQuery();
@@ -91,7 +91,7 @@ public class SalaDAO {
 
         try {
             conexion = conn.getConexion();
-            String query = "INSERT INTO sala (numero_sala, capacidad) VALUES (?, ?)";
+            String query = "INSERT INTO tablas.sala (numero_sala, capacidad) VALUES (?, ?)";
             ps = conexion.prepareStatement(query);
             ps.setInt(1, sala.getNumeroSala());
             ps.setInt(2, sala.getCapacidad());
@@ -120,7 +120,7 @@ public class SalaDAO {
 
         try {
             conexion = conn.getConexion();
-            String query = "UPDATE sala SET numero_sala = ?, capacidad = ? WHERE id_sala = ?";
+            String query = "UPDATE tablas.sala SET numero_sala = ?, capacidad = ? WHERE id_sala = ?";
             ps = conexion.prepareStatement(query);
             ps.setInt(1, sala.getNumeroSala());
             ps.setInt(2, sala.getCapacidad());
@@ -150,7 +150,7 @@ public class SalaDAO {
 
         try {
             conexion = conn.getConexion();
-            String query = "DELETE FROM sala WHERE id_sala = ?";
+            String query = "DELETE FROM tablas.sala WHERE id_sala = ?";
             ps = conexion.prepareStatement(query);
             ps.setInt(1, idSala);
 
