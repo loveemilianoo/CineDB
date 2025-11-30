@@ -82,14 +82,8 @@
                                     <!-- Periodo -->
                                     <div class="mb-4">
                                         <label for="periodo" class="form-label fw-bold">Periodo</label>
-                                        <div class="input-group">
-                                            <input type="text" id="periodo" name="periodo" class="form-control"
-                                                placeholder="Seleccione periodo..." required>
-                                            <button type="button" id="btnAgregar31Dias"
-                                                class="btn btn-outline-secondary">
-                                                <i class="fa-solid fa-calendar-plus me-2"></i>31 Días
-                                            </button>
-                                        </div>
+                                        <input type="text" id="periodo" name="periodo" class="form-control"
+                                            placeholder="Seleccione periodo..." required>
                                     </div>
 
                                     <!-- Selección de Sala -->
@@ -128,7 +122,7 @@
                                         </div>
                                         <div class="form-text mt-2"><i class="fa-solid fa-circle-info me-1"></i>Ejemplo:
                                             20 horas y 30 minutos se guardará como "20:30"</div>
-                                        <input type="hidden" id="horaInicio" name="horaInicio">
+
                                     </div>
 
                                     <!-- Selección de Película -->
@@ -147,11 +141,7 @@
                                         </select>
                                     </div>
 
-                                    <!-- Precio -->
-                                    <div class="text-center mb-4 p-3 bg-light rounded">
-                                        <label class="text-muted mb-2">Precio Estimado</label>
-                                        <div class="price-display" id="precioDisplay">$0.00</div>
-                                    </div>
+
 
                                     <!-- Botones -->
                                     <div class="d-grid gap-2">
@@ -199,91 +189,7 @@
             </footer>
 
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-            <script>
-                // Variables globales
-                const PRECIO_BASE = 202.30;
-                let horaSeleccionada = '';
-                let idPeliculaSeleccionada = '';
 
-                // Inicialización cuando el DOM está listo
-                document.addEventListener('DOMContentLoaded', function () {
-                    inicializarEventos();
-                    actualizarPrecio();
-                });
-
-                // Inicializar eventos
-                function inicializarEventos() {
-                    // Evento para el botón de 31 días
-                    document.getElementById('btnAgregar31Dias').addEventListener('click', function () {
-                        const fechaActual = new Date();
-                        const fechaFin = new Date();
-                        fechaFin.setDate(fechaActual.getDate() + 31);
-
-                        const formato = { year: 'numeric', month: '2-digit', day: '2-digit' };
-                        const periodo = fechaActual.toLocaleDateString('es-ES', formato) + ' - ' +
-                            fechaFin.toLocaleDateString('es-ES', formato);
-
-                        document.getElementById('periodo').value = periodo;
-                    });
-
-                    // Evento para cambio de sala
-                    document.getElementById('sala').addEventListener('change', actualizarPrecio);
-
-                    // Evento para cambio de película
-                    document.getElementById('pelicula').addEventListener('change', function () {
-                        idPeliculaSeleccionada = this.value;
-                        actualizarPrecio();
-                    });
-
-                    // Sync hidden input for horaInicio (although we are using separate inputs now, the servlet might expect the combined string or we handle it there)
-                    // The previous code had buttons updating a hidden input. 
-                    // The NEW code has number inputs. We should probably construct the string on submit or let the servlet handle separate fields.
-                    // Looking at the previous code, it had: <input type="hidden" id="horaInicio" name="horaInicio" required>
-                    // And the servlet likely reads "horaInicio".
-                    // So let's update the hidden input when the number inputs change.
-
-                    const horasInput = document.getElementById('horas');
-                    const minutosInput = document.getElementById('minutos');
-
-                    function updateHiddenHora() {
-                        const h = horasInput.value.padStart(2, '0');
-                        const m = minutosInput.value.padStart(2, '0');
-                        document.getElementById('horaInicio').value = h + ':' + m;
-                    }
-
-                    horasInput.addEventListener('change', updateHiddenHora);
-                    minutosInput.addEventListener('change', updateHiddenHora);
-
-                    // Initial update
-                    updateHiddenHora();
-                }
-
-                // Actualizar precio display
-                function actualizarPrecio() {
-                    const sala = document.getElementById('sala').value;
-                    const precioFinal = PRECIO_BASE;
-
-                    document.getElementById('precioDisplay').textContent = `$${precioFinal.toFixed(2)}`;
-                }
-
-                // Validación del formulario antes de enviar
-                document.getElementById('funcionForm').addEventListener('submit', function (e) {
-                    if (!validarFormulario()) {
-                        e.preventDefault();
-                        alert('Por favor, complete todos los campos requeridos.');
-                    }
-                });
-
-                function validarFormulario() {
-                    const periodo = document.getElementById('periodo').value;
-                    const sala = document.getElementById('sala').value;
-                    // horaInicio is updated by the inputs
-                    const hora = document.getElementById('horaInicio').value;
-                    const pelicula = document.getElementById('pelicula').value;
-
-                    return periodo && sala && hora && pelicula;
-                }
-            </script>
         </body>
 
         </html>

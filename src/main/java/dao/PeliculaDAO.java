@@ -97,4 +97,35 @@ public class PeliculaDAO {
         long segundos = partes.length > 2? Long.parseLong(partes[2]) :0 ;
         return Duration.ofHours(horas).plusMinutes(minutos).plusSeconds(segundos);
     }
+    
+    public void eliminarPelicula (int idPelicula){
+        Connection conn = null;
+        Conexion conexion = new Conexion();
+        PreparedStatement ps = null;
+
+        try{
+            conn = conexion.getConexion();
+            String query = "DELETE FROM tablas.pelicula WHERE id_pelicula=?";
+            
+            ps = conn.prepareStatement(query);
+            ps.setInt(1, idPelicula);
+            ps.executeUpdate();
+            
+        } catch (SQLException e){
+            System.out.println("Error "+e.toString());
+            e.printStackTrace();
+        } finally {
+            try{
+                if (ps != null) ps.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e){
+                System.out.println("Error en la base de datos "+e.toString());
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    
+    
+    
 }
