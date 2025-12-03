@@ -20,10 +20,7 @@
         ProductoDAO dao = new ProductoDAO();
 
         try {
-Producto p = new Producto(0, nombre, new BigDecimal(precio), Integer.parseInt(stock));
-            p.setNombre(nombre);
-            p.setPrecioVenta(new java.math.BigDecimal(precio));
-            p.setStock(Integer.parseInt(stock));
+            Producto p = new Producto(0, nombre, new BigDecimal(precio), Integer.parseInt(stock));
 
             dao.insertarProducto(p);
 
@@ -50,4 +47,25 @@ Producto p = new Producto(0, nombre, new BigDecimal(precio), Integer.parseInt(st
         <table>
             <tr>
                 <td>Nombre:</td>
-                <td><input t
+                <td><input type="text" name="nombre"></td>
+            </tr>
+
+            <tr>
+                <td>Costo:</td>
+                <td><input type="text" name="precio"></td>
+            </tr>
+
+            <tr>
+                <td>Stock:</td>
+                <td><input type="number" name="stock"></td>
+            </tr>
+
+            <tr>
+                <td colspan="2">
+                    <button type="submit">Guardar</button>
+                </td>
+            </tr>
+        </table>
+    </form>
+</body>
+</html>
