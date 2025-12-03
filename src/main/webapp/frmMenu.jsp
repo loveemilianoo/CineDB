@@ -122,7 +122,7 @@
               <p class="card-text text-muted mb-4">
                 Disfruta de nuestros deliciosos combos, snacks y bebidas. El complemento perfecto para tu película.
               </p>
-              <a href="#" class="btn btn-success btn-action w-100">
+              <a href="frmListadoProducto.jsp" class="btn btn-success btn-action w-100">
                 <i class="fa-solid fa-utensils me-2"></i>Ordenar Comida
               </a>
             </div>
@@ -146,7 +146,7 @@
                 </button>
                 <ul class="dropdown-menu w-100">
                   <li><a class="dropdown-item" href="frmListadoPeliculas.jsp"><i class="fa-solid fa-film me-2"></i>Gestionar Películas</a></li>
-                  <li><a class="dropdown-item" href="#"><i class="fa-solid fa-tags me-2"></i>Gestionar Productos</a></li>
+                  <li><a class="dropdown-item" href="frmListadoProducto.jsp"><i class="fa-solid fa-tags me-2"></i>Gestionar Productos</a></li>
                   <li><hr class="dropdown-divider"></li>
                   <li><a class="dropdown-item" href="#"><i class="fa-solid fa-chart-bar me-2"></i>Reportes</a></li>
                 </ul>
