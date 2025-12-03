@@ -51,7 +51,7 @@
             </tr>
 
             <tr>
-                <td>Precio:</td>
+                <td>Costo:</td>
                 <td><input type="text" name="precio"></td>
             </tr>
 
