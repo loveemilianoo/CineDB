@@ -6,46 +6,50 @@ import entity.*;
 import java.sql.*;
 
 public class BoletoDAO {
-     public List <Boleto> getBoletos() {
-         Conexion conn = new Conexion();
-         Connection conexion = null;
-         List <Boleto> boletos = new ArrayList();
-         PreparedStatement ps = null;
-         ResultSet rs = null;
-         
-         try{
-             conexion = conn.getConexion();
-             String query = "SELECT * FROM tablas.boleto ORDER BY id_boleto ASC";
-             ps= conexion.prepareStatement(query);
-             rs = ps.executeQuery();
-             
-             ResultSetMetaData rsmd = rs.getMetaData();
-             int columnas = rsmd.getColumnCount();
-             
-             while (rs.next()) {
+    public List<Boleto> getBoletosPorUsuario(int idUsuario) {
+        List<Boleto> boletos = new ArrayList<>();
+        Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+        
+        
+        try {
+            Conexion conexion = new Conexion();
+            conn = conexion.getConexion();
+            
+            String query = "SELECT * FROM tablas.boleto WHERE id_usuario = ? ORDER BY fecha_compra DESC";
+            
+            ps = conn.prepareStatement(query);
+            ps.setInt(1, idUsuario);
+            rs = ps.executeQuery();
+            
+            while (rs.next()) {
                 Boleto boleto = new Boleto();
                 boleto.setIdBoleto(rs.getInt("id_boleto"));
                 boleto.setIdFuncion(rs.getInt("id_funcion"));
-                boleto.setIdAsiento(rs.getInt("id_asiento"));
-                boleto.setIdTransaccion(rs.getInt("id_transaccion"));
+                boleto.setIdUsuario(rs.getInt("id_usuario"));
+                boleto.setAsiento(rs.getString("asiento"));
                 boleto.setPrecio(rs.getBigDecimal("precio"));
-                boleto.setTipoBoleto(rs.getString("tipo_boleto"));
-                boleto.setEstado(rs.getString("estado"));
                 
+                Timestamp timestamp = rs.getTimestamp("fecha_compra");
+                if (timestamp != null) {
+                    boleto.setFechaCompra(timestamp.toLocalDateTime());
+                }
+                boleto.setEstado(rs.getString("estado"));
                 boletos.add(boleto);
             }
-         } catch (Exception e){
-             e.printStackTrace();
-             System.out.println("Error "+e.toString());
-         } finally {
-             try {
-                 if (rs!= null) rs.close();
-                 if (ps!= null) ps.close();
-                 if (conexion != null) conexion.close();
-             } catch (SQLException e){
-                 System.out.println("Error al cerrar recursos "+e.toString());
-             }
-         } 
-         return boletos;
-     }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error " + e.toString());
+        } finally {
+            try {
+                if (rs != null)rs.close();
+                if (ps != null)ps.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                System.out.println("Error al cerrar recursos " + e.toString());
+            }
+        }
+        return boletos;
+    }
 }

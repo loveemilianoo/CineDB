@@ -122,7 +122,7 @@
               <p class="card-text text-muted mb-4">
                 Disfruta de nuestros deliciosos combos, snacks y bebidas. El complemento perfecto para tu película.
               </p>
-              <a href="frmListadoProducto.jsp" class="btn btn-success btn-action w-100">
+              <a href="frmSeleccionarComida.jsp" class="btn btn-success btn-action w-100">
                 <i class="fa-solid fa-utensils me-2"></i>Ordenar Comida
               </a>
             </div>

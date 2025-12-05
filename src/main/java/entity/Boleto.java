@@ -1,30 +1,26 @@
 package entity;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 public class Boleto {
     private int idBoleto;
     private int idFuncion;
-    private int idAsiento;
-    private int idTransaccion;
+    private int idUsuario;
+    private String asiento;  
     private BigDecimal precio;
-    private String tipoBoleto;
+    private LocalDateTime fechaCompra;
     private String estado;
-    private Funcion funcion; 
-    private Asiento asiento; 
-    private Transaccion transaccion;
     
-    public Boleto (){}
+    public Boleto() {}
     
-    public Boleto(int idBoleto, int idFuncion, int idAsiento, int idTransaccion, 
-                  BigDecimal precio, String tipoBoleto, String estado) {
-        this.idBoleto = idBoleto;
+    public Boleto(int idFuncion, int idUsuario, String asiento, BigDecimal precio) {
         this.idFuncion = idFuncion;
-        this.idAsiento = idAsiento;
-        this.idTransaccion = idTransaccion;
+        this.idUsuario = idUsuario;
+        this.asiento = asiento;
         this.precio = precio;
-        this.tipoBoleto = tipoBoleto;
-        this.estado = estado;
+        this.fechaCompra = LocalDateTime.now();
+        this.estado = "activo";
     }
     
     public int getIdBoleto() { return idBoleto; }
@@ -33,27 +29,18 @@ public class Boleto {
     public int getIdFuncion() { return idFuncion; }
     public void setIdFuncion(int idFuncion) { this.idFuncion = idFuncion; }
     
-    public int getIdAsiento() { return idAsiento; }
-    public void setIdAsiento(int idAsiento) { this.idAsiento = idAsiento; }
+    public int getIdUsuario() { return idUsuario; }
+    public void setIdUsuario(int idUsuario) { this.idUsuario = idUsuario; }
     
-    public int getIdTransaccion() { return idTransaccion; }
-    public void setIdTransaccion(int idTransaccion) { this.idTransaccion = idTransaccion; }
+    public String getAsiento() { return asiento; }
+    public void setAsiento(String asiento) { this.asiento = asiento; }
     
     public BigDecimal getPrecio() { return precio; }
     public void setPrecio(BigDecimal precio) { this.precio = precio; }
     
-    public String getTipoBoleto() { return tipoBoleto; }
-    public void setTipoBoleto(String tipoBoleto) { this.tipoBoleto = tipoBoleto; }
+    public LocalDateTime getFechaCompra() { return fechaCompra; }
+    public void setFechaCompra(LocalDateTime fechaCompra) { this.fechaCompra = fechaCompra; }
     
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }
-    
-    public Funcion getFuncion() { return funcion; }
-    public void setFuncion(Funcion funcion) { this.funcion = funcion; }
-    
-    public Asiento getAsiento() { return asiento; }
-    public void setAsiento(Asiento asiento) { this.asiento = asiento; }
-    
-    public Transaccion getTransaccion() { return transaccion; }
-    public void setTransaccion(Transaccion transaccion) { this.transaccion = transaccion; }
 }
