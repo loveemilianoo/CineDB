@@ -194,4 +194,50 @@ public class FuncionDAO {
         }
         return funcion;
     }
+    
+    public List<Funcion> getFuncionesPorPelicula(int idPelicula) {
+        List<Funcion> funciones = new ArrayList<>();
+        Connection conn = null;
+        Conexion conexion = null;
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+        Funcion funcion = null;
+    
+        try {
+            conn = conexion.getConexion();
+            String query = "SELECT * FROM tablas.funcion WHERE id_pelicula = ? ORDER BY fecha, hora_inicio";
+            ps = conn.prepareStatement(query);
+            ps.setInt(1, idPelicula);
+            rs = ps.executeQuery();
+        
+        while (rs.next()) {
+            funcion = new Funcion();
+            funcion.setIdFuncion(rs.getInt("id_funcion"));
+            funcion.setIdPelicula(rs.getInt("id_pelicula"));
+            funcion.setIdSala(rs.getInt("id_sala"));
+            
+            java.sql.Date sqlDate = rs.getDate("fecha");
+            if (sqlDate != null) {
+                funcion.setFecha(sqlDate.toLocalDate());
+            }
+            java.sql.Time sqlTime = rs.getTime("hora_inicio");
+            if (sqlTime != null) {
+                funcion.setHoraInicio(sqlTime.toLocalTime());
+            }
+            funciones.add(funcion);
+            }
+        } catch (Exception e) {
+            System.out.println("Error " + e.toString());
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null)rs.close();
+                if (ps != null)ps.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                System.out.println("Error al cerrar recursos " + e.toString());
+            }
+        }
+    return funciones;
+    }
 }
