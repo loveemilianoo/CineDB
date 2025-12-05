@@ -134,7 +134,7 @@
                 
                 <!-- Botón Nuevo Producto abajo del título -->
                 <div class="action-buttons">
-                    <a href="frmInsertaProducto.jsp" class="btn btn-light btn-primary-lg">
+                    <a href="frmGuardaProducto.jsp" class="btn btn-light btn-primary-lg">
                         <i class="fa-solid fa-plus me-2"></i>Nuevo Producto
                     </a>
                 </div>
@@ -272,7 +272,7 @@
                                     <i class="fa-solid fa-box-open text-muted"></i>
                                     <h4 class="text-muted mb-3">No hay productos registrados</h4>
                                     <p class="text-muted mb-4">Comienza agregando tu primer producto</p>
-                                    <a href="frmInsertaProducto.jsp" class="btn btn-primary">
+                                    <a href="frmGuardaProducto.jsp" class="btn btn-primary">
                                         <i class="fa-solid fa-plus me-2"></i>Agregar Producto
                                     </a>
                                 </div>
