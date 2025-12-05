@@ -168,7 +168,7 @@
               <a href="frmSeleccionarPelicula.jsp" class="btn btn-outline-light btn-sm">
                 <i class="fa-solid fa-ticket me-1"></i>Boletos
               </a>
-              <a href="#" class="btn btn-outline-light btn-sm">
+              <a href="frmSeleccionarComida.jsp" class="btn btn-outline-light btn-sm">
                 <i class="fa-solid fa-popcorn me-1"></i>Comida
               </a>
               <a href="frmListadoPeliculas.jsp" class="btn btn-outline-light btn-sm">
