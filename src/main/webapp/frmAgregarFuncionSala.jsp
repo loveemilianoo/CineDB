@@ -16,7 +16,6 @@
             padding-bottom: 15px;
             margin-bottom: 30px;
         }
-
         .section-title:after {
             content: '';
             position: absolute;
@@ -27,14 +26,19 @@
             height: 3px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
-        
         .alert {
             animation: fadeIn 0.5s;
         }
-        
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
+        }
+        .debug-panel {
+            background: #f8f9fa;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 12px;
         }
     </style>
 </head>
@@ -53,7 +57,7 @@
             String minutosStr = request.getParameter("minutos");
             String idPeliculaStr = request.getParameter("idPelicula");
             String idSalaStr = request.getParameter("idSala");
-            
+           
             // Validar que todos los campos estén presentes
             if (fechaStr != null && !fechaStr.trim().isEmpty() &&
                 horasStr != null && !horasStr.trim().isEmpty() &&
@@ -78,19 +82,17 @@
                 // Crear LocalTime
                 LocalTime horaInicio = LocalTime.of(horas, minutos);
                 
-                // Crear objeto Funcion (necesitarás crear esta clase)
-                // Por ahora, vamos a mostrar los datos
-                success = true;
+                // CREAR Y GUARDAR LA FUNCIÓN
+                Funcion funcion = new Funcion();
+                funcion.setFecha(fecha);
+                funcion.setHoraInicio(horaInicio);
+                funcion.setIdPelicula(Integer.parseInt(idPeliculaStr));
+                funcion.setIdSala(Integer.parseInt(idSalaStr));
+
+                FuncionDAO funcionDAO = new FuncionDAO();
+                funcionDAO.insertarFuncion(funcion);
                 
-                // Aquí iría el código para guardar en la base de datos
-                // Funcion funcion = new Funcion();
-                // funcion.setFecha(fecha);
-                // funcion.setHoraInicio(horaInicio);
-                // funcion.setIdPelicula(Integer.parseInt(idPeliculaStr));
-                // funcion.setIdSala(Integer.parseInt(idSalaStr));
-                // 
-                // FuncionDAO funcionDAO = new FuncionDAO();
-                // funcionDAO.insertarFuncion(funcion);
+                success = true;
                 
                 out.println("<div class='alert alert-success alert-dismissible fade show' role='alert'>");
                 out.println("<i class='fa-solid fa-check-circle me-2'></i>");
@@ -104,13 +106,17 @@
             }
             
         } catch (DateTimeException e) {
-            errorMessage = "Formato de fecha u hora inválido";
+            errorMessage = "Formato de fecha u hora inválido: " + e.getMessage();
+            e.printStackTrace();
         } catch (NumberFormatException e) {
-            errorMessage = "Horas y minutos deben ser números válidos";
+            errorMessage = "Horas y minutos deben ser números válidos: " + e.getMessage();
+            e.printStackTrace();
         } catch (IllegalArgumentException e) {
             errorMessage = e.getMessage();
+            e.printStackTrace();
         } catch (Exception e) {
             errorMessage = "Error al procesar la función: " + e.getMessage();
+            e.printStackTrace();
         }
         
         if (!errorMessage.isEmpty()) {
@@ -203,6 +209,7 @@
                                     <% 
                                     SalaDAO salaDao = new SalaDAO(); 
                                     List<Sala> salas = salaDao.getSalas();
+                                    System.out.println("DEBUG: Salas encontradas: " + salas.size());
                                     for (Sala sala : salas) {
                                     %>
                                     <option value="<%= sala.getIdSala() %>">
@@ -220,6 +227,7 @@
                                     <% 
                                     PeliculaDAO peliculaDAO = new PeliculaDAO(); 
                                     List<Pelicula> peliculas = peliculaDAO.getPeliculas();
+                                    System.out.println("DEBUG: Películas encontradas: " + peliculas.size());
                                     for (Pelicula pelicula : peliculas) {
                                         Duration duracion = pelicula.getDuracion();
                                         long horas = duracion.toHours();
@@ -248,7 +256,13 @@
                 </div>
                 
                 <!-- Información de la función creada -->
-                <% if (success) { %>
+                <% if (success) { 
+                    String fechaParam = request.getParameter("fecha");
+                    String horasParam = request.getParameter("horas");
+                    String minutosParam = request.getParameter("minutos");
+                    String idSalaParam = request.getParameter("idSala");
+                    String idPeliculaParam = request.getParameter("idPelicula");
+                %>
                 <div class="card shadow-sm border-success mt-4">
                     <div class="card-header bg-success text-white">
                         <i class="fa-solid fa-clipboard-check me-2"></i>Resumen de la Función
@@ -257,37 +271,49 @@
                         <h5 class="card-title">Detalles de la función programada:</h5>
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item">
-                                <strong>Fecha:</strong> <%= request.getParameter("fecha") %>
+                                <strong>Fecha:</strong> <%= fechaParam != null ? fechaParam : "N/A" %>
                             </li>
                             <li class="list-group-item">
                                 <strong>Hora:</strong> 
-                                <%= request.getParameter("horas") %>:<%= request.getParameter("minutos") %>
+                                <%= horasParam != null ? horasParam : "N/A" %>:<%= minutosParam != null ? minutosParam : "N/A" %>
                             </li>
                             <li class="list-group-item">
                                 <strong>Sala:</strong> 
                                 <% 
-                                // Mostrar nombre de la sala seleccionada
-                                String idSala = request.getParameter("idSala");
-                                if (idSala != null && !idSala.isEmpty()) {
-                                    int salaId = Integer.parseInt(idSala);
-                                    Sala sala = salaDao.getSalaPorId(salaId);
-                                    if (sala != null) {
-                                        out.print("Sala " + sala.getNumeroSala());
+                                if (idSalaParam != null && !idSalaParam.isEmpty()) {
+                                    try {
+                                        int salaId = Integer.parseInt(idSalaParam);
+                                        Sala sala = salaDao.getSalaPorId(salaId);
+                                        if (sala != null) {
+                                            out.print("Sala " + sala.getNumeroSala());
+                                        } else {
+                                            out.print("Sala no encontrada (ID: " + salaId + ")");
+                                        }
+                                    } catch (NumberFormatException e) {
+                                        out.print("ID de sala inválido");
                                     }
+                                } else {
+                                    out.print("No especificada");
                                 }
                                 %>
                             </li>
                             <li class="list-group-item">
                                 <strong>Película:</strong> 
                                 <% 
-                                // Mostrar título de la película seleccionada
-                                String idPelicula = request.getParameter("idPelicula");
-                                if (idPelicula != null && !idPelicula.isEmpty()) {
-                                    int peliculaId = Integer.parseInt(idPelicula);
-                                    Pelicula pelicula = peliculaDAO.getPeliculaPorId(peliculaId);
-                                    if (pelicula != null) {
-                                        out.print(pelicula.getTitulo());
+                                if (idPeliculaParam != null && !idPeliculaParam.isEmpty()) {
+                                    try {
+                                        int peliculaId = Integer.parseInt(idPeliculaParam);
+                                        Pelicula pelicula = peliculaDAO.getPeliculaPorId(peliculaId);
+                                        if (pelicula != null) {
+                                            out.print(pelicula.getTitulo());
+                                        } else {
+                                            out.print("Película no encontrada (ID: " + peliculaId + ")");
+                                        }
+                                    } catch (NumberFormatException e) {
+                                        out.print("ID de película inválido");
                                     }
+                                } else {
+                                    out.print("No especificada");
                                 }
                                 %>
                             </li>
@@ -295,6 +321,9 @@
                         <div class="text-center mt-3">
                             <a href="frmAgregarFuncionSala.jsp" class="btn btn-primary">
                                 <i class="fa-solid fa-plus me-2"></i>Agregar Otra Función
+                            </a>
+                            <a href="frmSeleccionarPelicula.jsp" class="btn btn-success ms-2">
+                                <i class="fa-solid fa-ticket me-2"></i>Ver Cartelera
                             </a>
                         </div>
                     </div>
@@ -334,7 +363,5 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
 </body>
-
 </html>

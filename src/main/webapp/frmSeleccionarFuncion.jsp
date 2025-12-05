@@ -1,7 +1,9 @@
 <%@page import="dao.FuncionDAO"%>
 <%@page import="dao.SalaDAO"%>
+<%@page import="dao.PeliculaDAO"%>
 <%@page import="entity.Funcion"%>
 <%@page import="entity.Sala"%>
+<%@page import="entity.Pelicula"%>
 <%@page import="java.util.List"%>
 <%@page import="java.time.LocalTime"%>
 <%@page import="java.time.format.DateTimeFormatter"%>
@@ -88,17 +90,36 @@
             color: #6c757d;
             font-size: 1.1rem;
         }
-        .debug-info {
-            background-color: #f8f9fa;
+        .debug-panel {
+            background: #f8f9fa;
             border-left: 4px solid #dc3545;
-            padding: 10px;
-            margin: 10px 0;
+            padding: 15px;
+            margin: 15px 0;
             font-size: 12px;
-            display: none; /* Oculta en producción */
         }
     </style>
 </head>
 <body>
+    <%
+    String idPeliculaStr = request.getParameter("idPelicula");
+    String tituloPelicula = request.getParameter("tituloPelicula");
+    
+    if (idPeliculaStr == null || tituloPelicula == null) {
+        // Si no vienen parámetros, redirigir a selección de película
+        response.sendRedirect("frmSeleccionarPelicula.jsp");
+        return;
+    }
+    
+    if (idPeliculaStr != null && !idPeliculaStr.trim().isEmpty()) {
+        try {
+            int idPelicula = Integer.parseInt(idPeliculaStr);
+            FuncionDAO funcionDAO = new FuncionDAO();
+            
+            // Usar getFuncionesPelicula (que ya tienes implementado)
+            List<Funcion> funciones = funcionDAO.getFuncionesPelicula(idPelicula);
+           
+    %>
+
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
@@ -133,26 +154,6 @@
         </div>
     </header>
 
-    <main class="container my-5">
-        <%
-            // Debug info
-            System.out.println("=== DEBUG frmSeleccionarFuncion.jsp ===");
-            System.out.println("idPelicula param: " + request.getParameter("idPelicula"));
-            System.out.println("tituloPelicula param: " + request.getParameter("tituloPelicula"));
-            
-            String idPeliculaStr = request.getParameter("idPelicula");
-            String tituloPelicula = request.getParameter("tituloPelicula");
-            
-            if (idPeliculaStr != null && !idPeliculaStr.trim().isEmpty()) {
-                try {
-                    int idPelicula = Integer.parseInt(idPeliculaStr);
-                    FuncionDAO funcionDAO = new FuncionDAO();
-                    
-                    // IMPORTANTE: El método debe llamarse getFuncionesPorPelicula, no getFuncionesPelicula
-                    List<Funcion> funciones = funcionDAO.getFuncionesPorPelicula(idPelicula);
-                    System.out.println("Funciones encontradas: " + funciones.size());
-        %>
-
         <!-- Movie Info -->
         <div class="row mb-5">
             <div class="col-12 text-center">
@@ -164,14 +165,6 @@
             </div>
         </div>
 
-        <!-- Debug info (oculto en producción) -->
-        <div class="debug-info">
-            <strong>Debug Info:</strong><br>
-            ID Película: <%= idPelicula %><br>
-            Título: <%= tituloPelicula %><br>
-            Funciones: <%= funciones.size() %>
-        </div>
-
         <!-- Functions Grid -->
         <% if (funciones.isEmpty()) { %>
             <div class="empty-state">
@@ -181,15 +174,21 @@
                 <a href="frmSeleccionarPelicula.jsp" class="btn btn-primary btn-lg">
                     <i class="fa-solid fa-arrow-left me-2"></i>Volver a Películas
                 </a>
+                <a href="frmAgregarFuncionSala.jsp?idPelicula=<%= idPelicula %>&titulo=<%= java.net.URLEncoder.encode(tituloPelicula, "UTF-8") %>" 
+                   class="btn btn-success btn-lg ms-2">
+                    <i class="fa-solid fa-plus me-2"></i>Agregar Función
+                </a>
             </div>
         <% } else { %>
             <div class="row g-4">
                 <% 
                 DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE, d 'de' MMMM", new java.util.Locale("es"));
                 SalaDAO salaDAO = new SalaDAO();
+                PeliculaDAO peliculaDAO = new PeliculaDAO();
+                Pelicula pelicula = peliculaDAO.getPeliculaPorId(idPelicula);
                 
                 for (Funcion funcion : funciones) { 
-                    // CORRECCIÓN: getHoraInicio() retorna LocalTime, no Duration
+                    // Obtener hora de inicio
                     LocalTime horaInicio = funcion.getHoraInicio();
                     int horas = horaInicio.getHour();
                     int minutos = horaInicio.getMinute();
@@ -239,39 +238,52 @@
                     </div>
                 <% } %>
             </div>
-        <% } 
-                } catch (NumberFormatException e) {
-                    System.out.println("Error: idPelicula no es un número válido: " + idPeliculaStr);
-        %>
-            <div class="alert alert-danger text-center">
-                <i class="fa-solid fa-exclamation-triangle me-2"></i>
-                Error: ID de película inválido
-            </div>
-        <% 
-                }
-        } else { 
-            System.out.println("Error: idPelicula es null o vacío");
-        %>
-            <!-- Error State -->
-            <div class="empty-state">
-                <i class="fa-solid fa-exclamation-triangle"></i>
-                <h3 class="text-danger mb-3">Error</h3>
-                <p class="text-muted mb-4">No se especificó la película. Por favor, selecciona una película primero.</p>
-                <a href="frmSeleccionarPelicula.jsp" class="btn btn-primary btn-lg">
-                    <i class="fa-solid fa-arrow-left me-2"></i>Volver a Películas
-                </a>
-            </div>
         <% } %>
-
+        
         <!-- Back Button -->
         <div class="row mt-5">
             <div class="col-12 text-center">
                 <a href="frmSeleccionarPelicula.jsp" class="btn btn-outline-secondary">
                     <i class="fa-solid fa-arrow-left me-2"></i>Volver a Películas
                 </a>
+                <a href="frmAgregarFuncionSala.jsp?idPelicula=<%= idPelicula %>&titulo=<%= java.net.URLEncoder.encode(tituloPelicula, "UTF-8") %>" 
+                   class="btn btn-success ms-2">
+                    <i class="fa-solid fa-plus me-2"></i>Agregar Nueva Función
+                </a>
             </div>
         </div>
     </main>
+
+    <%
+                } catch (NumberFormatException e) {
+                    System.out.println("Error: idPelicula no es un número válido: " + idPeliculaStr);
+    %>
+    <div class="container my-5">
+        <div class="alert alert-danger text-center">
+            <i class="fa-solid fa-exclamation-triangle me-2"></i>
+            <h3>Error: ID de película inválido</h3>
+            <p>El ID de película proporcionado no es válido: <%= idPeliculaStr %></p>
+            <a href="frmSeleccionarPelicula.jsp" class="btn btn-primary">
+                <i class="fa-solid fa-arrow-left me-2"></i>Volver a Películas
+            </a>
+        </div>
+    </div>
+    <% 
+                }
+        } else { 
+            System.out.println("Error: idPelicula es null o vacío");
+    %>
+    <div class="container my-5">
+        <div class="alert alert-danger text-center">
+            <i class="fa-solid fa-exclamation-triangle me-2"></i>
+            <h3>Error: Película no especificada</h3>
+            <p>No se especificó la película. Por favor, selecciona una película primero.</p>
+            <a href="frmSeleccionarPelicula.jsp" class="btn btn-primary">
+                <i class="fa-solid fa-arrow-left me-2"></i>Volver a Películas
+            </a>
+        </div>
+    </div>
+    <% } %>
 
     <!-- Footer -->
     <footer class="bg-dark text-white py-4 mt-5">

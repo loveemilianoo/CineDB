@@ -117,7 +117,7 @@ public class FuncionDAO {
         }
     }
 
-    public void insertarFuncion(int idPelicula, int idSala, Funcion funcion) {
+    public void insertarFuncion(Funcion funcion) {
         Connection conn = null;
         Conexion conexion = new Conexion();
         PreparedStatement ps = null;
@@ -128,8 +128,8 @@ public class FuncionDAO {
 
             String query = "INSERT INTO tablas.funcion (id_pelicula, id_sala, fecha, hora_inicio) VALUES (?,?,?,?)";
             ps = conn.prepareStatement(query);
-            ps.setInt(1, idPelicula);
-            ps.setInt(2, idSala);
+            ps.setInt(1, funcion.getIdPelicula());
+            ps.setInt(2, funcion.getIdSala());
             ps.setDate(3, java.sql.Date.valueOf(funcion.getFecha()));
             ps.setTime(4, java.sql.Time.valueOf(funcion.getHoraInicio()));
             

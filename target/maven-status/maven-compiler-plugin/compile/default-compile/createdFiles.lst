@@ -6,6 +6,7 @@ dao\SalaDAO.class
 dao\BoletoDAO.class
 dao\FuncionDAO.class
 entity\Transaccion.class
+dao\PeliculaDAO.class
 entity\Boleto.class
 dao\ProductoDAO.class
 entity\DetalleProducto.class

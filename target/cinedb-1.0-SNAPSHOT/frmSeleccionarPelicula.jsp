@@ -170,7 +170,8 @@
                 <input type="hidden" name="tituloPelicula" value="<%= pelicula.getTitulo() %>">
                 <button type="submit" class="btn btn-primary btn-select w-100">
                   <i class="fa-solid fa-ticket me-2"></i>
-                  Ver Funciones Disponibles
+                  
+                  
                 </button>
               </form>
             </div>
