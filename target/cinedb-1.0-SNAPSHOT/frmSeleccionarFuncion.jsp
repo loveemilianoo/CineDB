@@ -1,6 +1,9 @@
 <%@page import="dao.FuncionDAO"%>
+<%@page import="dao.SalaDAO"%>
 <%@page import="entity.Funcion"%>
+<%@page import="entity.Sala"%>
 <%@page import="java.util.List"%>
+<%@page import="java.time.LocalTime"%>
 <%@page import="java.time.format.DateTimeFormatter"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -85,6 +88,14 @@
             color: #6c757d;
             font-size: 1.1rem;
         }
+        .debug-info {
+            background-color: #f8f9fa;
+            border-left: 4px solid #dc3545;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 12px;
+            display: none; /* Oculta en producción */
+        }
     </style>
 </head>
 <body>
@@ -124,24 +135,41 @@
 
     <main class="container my-5">
         <%
+            // Debug info
+            System.out.println("=== DEBUG frmSeleccionarFuncion.jsp ===");
+            System.out.println("idPelicula param: " + request.getParameter("idPelicula"));
+            System.out.println("tituloPelicula param: " + request.getParameter("tituloPelicula"));
+            
             String idPeliculaStr = request.getParameter("idPelicula");
             String tituloPelicula = request.getParameter("tituloPelicula");
             
-            if (idPeliculaStr != null) {
-                int idPelicula = Integer.parseInt(idPeliculaStr);
-                FuncionDAO funcionDAO = new FuncionDAO();
-                List<Funcion> funciones = funcionDAO.getFuncionesPelicula(idPelicula);
+            if (idPeliculaStr != null && !idPeliculaStr.trim().isEmpty()) {
+                try {
+                    int idPelicula = Integer.parseInt(idPeliculaStr);
+                    FuncionDAO funcionDAO = new FuncionDAO();
+                    
+                    // IMPORTANTE: El método debe llamarse getFuncionesPorPelicula, no getFuncionesPelicula
+                    List<Funcion> funciones = funcionDAO.getFuncionesPorPelicula(idPelicula);
+                    System.out.println("Funciones encontradas: " + funciones.size());
         %>
 
         <!-- Movie Info -->
         <div class="row mb-5">
             <div class="col-12 text-center">
-                <h2 class="movie-title"><%= tituloPelicula %></h2>
+                <h2 class="movie-title"><%= tituloPelicula != null ? tituloPelicula : "Película" %></h2>
                 <p class="movie-subtitle">
                     <i class="fa-solid fa-calendar me-1"></i>
                     <%= funciones.size() %> función(es) disponible(s)
                 </p>
             </div>
+        </div>
+
+        <!-- Debug info (oculto en producción) -->
+        <div class="debug-info">
+            <strong>Debug Info:</strong><br>
+            ID Película: <%= idPelicula %><br>
+            Título: <%= tituloPelicula %><br>
+            Funciones: <%= funciones.size() %>
         </div>
 
         <!-- Functions Grid -->
@@ -158,17 +186,25 @@
             <div class="row g-4">
                 <% 
                 DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE, d 'de' MMMM", new java.util.Locale("es"));
+                SalaDAO salaDAO = new SalaDAO();
+                
                 for (Funcion funcion : funciones) { 
-                    java.time.Duration horaInicio = funcion.getHoraInicio();
-                    long horas = horaInicio.toHours();
-                    long minutos = horaInicio.toMinutesPart();
+                    // CORRECCIÓN: getHoraInicio() retorna LocalTime, no Duration
+                    LocalTime horaInicio = funcion.getHoraInicio();
+                    int horas = horaInicio.getHour();
+                    int minutos = horaInicio.getMinute();
                     String horaFormateada = String.format("%02d:%02d", horas, minutos);
+                    
+                    // Obtener información de la sala
+                    Sala sala = salaDAO.getSalaPorId(funcion.getIdSala());
+                    int numeroSala = (sala != null) ? sala.getNumeroSala() : 0;
+                    int capacidad = (sala != null) ? sala.getCapacidad() : 0;
                 %>
                     <div class="col-md-6 col-lg-4">
                         <div class="funcion-card h-100">
                             <div class="funcion-header">
                                 <span class="sala-badge">
-                                    <i class="fa-solid fa-door-open me-1"></i>Sala <%= funcion.getSala().getNumeroSala() %>
+                                    <i class="fa-solid fa-door-open me-1"></i>Sala <%= numeroSala %>
                                 </span>
                             </div>
                             <div class="funcion-body text-center">
@@ -182,17 +218,18 @@
                                 <div class="mb-3">
                                     <small class="text-muted">
                                         <i class="fa-solid fa-users me-1"></i>
-                                        Capacidad: <%= funcion.getSala().getCapacidad() %> asientos
+                                        Capacidad: <%= capacidad %> asientos
                                     </small>
                                 </div>
                                 
-                                <form action="frmSeleccionarAsiento.jsp" method="GET">
+                                <form action="frmSeleccionarAsientos.jsp" method="GET">
                                     <input type="hidden" name="idFuncion" value="<%= funcion.getIdFuncion() %>">
                                     <input type="hidden" name="idPelicula" value="<%= idPelicula %>">
                                     <input type="hidden" name="tituloPelicula" value="<%= tituloPelicula %>">
                                     <input type="hidden" name="fechaFuncion" value="<%= funcion.getFecha() %>">
                                     <input type="hidden" name="horaFuncion" value="<%= horaFormateada %>">
-                                    <input type="hidden" name="numeroSala" value="<%= funcion.getSala().getNumeroSala() %>">
+                                    <input type="hidden" name="idSala" value="<%= funcion.getIdSala() %>">
+                                    <input type="hidden" name="numeroSala" value="<%= numeroSala %>">
                                     <button type="submit" class="btn btn-seleccionar w-100">
                                         <i class="fa-solid fa-armchair me-2"></i>Seleccionar Asientos
                                     </button>
@@ -203,7 +240,18 @@
                 <% } %>
             </div>
         <% } 
-        } else { %>
+                } catch (NumberFormatException e) {
+                    System.out.println("Error: idPelicula no es un número válido: " + idPeliculaStr);
+        %>
+            <div class="alert alert-danger text-center">
+                <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                Error: ID de película inválido
+            </div>
+        <% 
+                }
+        } else { 
+            System.out.println("Error: idPelicula es null o vacío");
+        %>
             <!-- Error State -->
             <div class="empty-state">
                 <i class="fa-solid fa-exclamation-triangle"></i>
