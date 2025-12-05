@@ -9,7 +9,6 @@ dao\BoletoDAO.class
 entity\Asiento.class
 dao\FuncionDAO.class
 entity\Transaccion.class
-dao\PeliculaDAO.class
 entity\Boleto.class
 dao\ProductoDAO.class
 entity\DetalleProducto.class
