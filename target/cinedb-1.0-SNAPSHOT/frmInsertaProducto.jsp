@@ -8,14 +8,15 @@
         try {
             String nombre = request.getParameter("nombre");
             String precioStr = request.getParameter("precio");
-            String disponible = request.getParameter("disponible");
+            String stockStr = request.getParameter("stock");
             
             // Validar campos obligatorios
             if(nombre != null && !nombre.trim().isEmpty() &&
-               precioStr != null && !precioStr.trim().isEmpty()) {
+               precioStr != null && !precioStr.trim().isEmpty() &&
+               stockStr != null && !stockStr.trim().isEmpty()) {
                 
                 BigDecimal precio = new BigDecimal(precioStr);
-                int stock = "si".equals(disponible) ? 1 : 0;
+                int stock = Integer.parseInt(stockStr);
                 
                 // ID temporal = 0, la BD generará el real
                 Producto producto = new Producto(0, nombre, precio, stock);
@@ -41,7 +42,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Nuevo Producto - Cine Prototype</title>
+    <title>Insertar Producto - Cine Prototype</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -74,23 +75,27 @@
             border-color: #667eea;
             box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
         }
-        .availability-badge {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
-        .available-badge {
-            background-color: #28a745;
-        }
-        .unavailable-badge {
-            background-color: #dc3545;
-        }
         .simple-form {
             background-color: #f8f9fa;
             border-radius: 10px;
             padding: 20px;
+        }
+        .stock-indicator {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .stock-high { background-color: #28a745; }
+        .stock-low { background-color: #fd7e14; }
+        .stock-zero { background-color: #dc3545; }
+        .stock-info {
+            background-color: #e9f7ef;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 10px;
+            border-left: 4px solid #28a745;
         }
     </style>
 </head>
@@ -108,7 +113,7 @@
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="frmMenu.jsp"><i class="fa-solid fa-home me-1"></i>Inicio</a></li>
                     <li class="nav-item"><a class="nav-link" href="frmSeleccionarPelicula.jsp"><i class="fa-solid fa-ticket me-1"></i>Boletos</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="fa-solid fa-popcorn me-1"></i>Comida</a></li>
+                    <li class="nav-item"><a class="nav-link" href="frmSeleccionarComida.jsp"><i class="fa-solid fa-popcorn me-1"></i>Comida</a></li>
                     <li class="nav-item dropdown">
                         <a class="nav-link active dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                             <i class="fa-solid fa-sliders me-1"></i>Administrar
@@ -126,14 +131,14 @@
     </nav>
 
     <!-- Header -->
-<header class="hero-section">
-    <div class="container">
-        <div class="hero-content d-flex flex-column align-items-center justify-content-center text-center">
-            <h1 class="display-4 fw-bold mb-3">Nuevo Producto</h1>
-            <p class="lead mb-0">Agrega un producto al catálogo</p>
+    <header class="hero-section">
+        <div class="container">
+            <div class="hero-content d-flex flex-column align-items-center justify-content-center text-center">
+                <h1 class="display-4 fw-bold mb-3">Nuevo Producto</h1>
+                <p class="lead mb-0">Agrega un producto al catálogo</p>
+            </div>
         </div>
-    </div>
-</header>
+    </header>
 
     <main class="container my-5">
         <div class="row justify-content-center">
@@ -144,7 +149,7 @@
                         <i class="fa-solid fa-cart-plus"></i>
                     </div>
                     <div class="card-body p-4">
-                        <h2 class="card-title text-center mb-4">Información Básica del Producto</h2>
+                        <h2 class="card-title text-center mb-4">Información del Producto</h2>
                         
                         <div class="simple-form">
                             <form method="POST" action="frmInsertaProducto.jsp">
@@ -179,36 +184,48 @@
                                     </div>
                                 </div>
                                 
-                                <!-- Disponibilidad (Sí/No) -->
+                                <!-- STOCK (Cantidad) - NUEVO CAMPO -->
                                 <div class="mb-4">
-                                    <label class="form-label fw-bold d-block mb-3">
-                                        <i class="fa-solid fa-circle-check me-2"></i>Disponibilidad
+                                    <label for="stock" class="form-label required-field fw-bold">
+                                        <i class="fa-solid fa-boxes-stacked me-2"></i>Cantidad en Stock
                                     </label>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" 
-                                               type="radio" 
-                                               name="disponible" 
-                                               id="disponibleSi" 
-                                               value="si" 
-                                               checked>
-                                        <label class="form-check-label" for="disponibleSi">
-                                            <span class="availability-badge available-badge"></span>
-                                            Disponible
-                                        </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fa-solid fa-cube"></i>
+                                        </span>
+                                        <input type="number" 
+                                               class="form-control" 
+                                               id="stock" 
+                                               name="stock" 
+                                               required
+                                               min="0"
+                                               value="0"
+                                               placeholder="0">
+                                        <span class="input-group-text">unidades</span>
                                     </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" 
-                                               type="radio" 
-                                               name="disponible" 
-                                               id="disponibleNo" 
-                                               value="no">
-                                        <label class="form-check-label" for="disponibleNo">
-                                            <span class="availability-badge unavailable-badge"></span>
-                                            No disponible
-                                        </label>
+                                    <div class="form-text">
+                                        Ingresa la cantidad inicial disponible en inventario.
                                     </div>
-                                    <div class="form-text mt-2">
-                                        Indica si el producto está disponible para la venta.
+                                    
+                                    <!-- Información sobre niveles de stock -->
+                                    <div class="stock-info">
+                                        <h6 class="fw-bold">
+                                            <i class="fa-solid fa-info-circle me-2"></i>Guía de niveles de stock:
+                                        </h6>
+                                        <ul class="list-unstyled mb-0">
+                                            <li>
+                                                <span class="stock-indicator stock-high"></span>
+                                                <strong>Disponible:</strong> Más de 5 unidades
+                                            </li>
+                                            <li>
+                                                <span class="stock-indicator stock-low"></span>
+                                                <strong>Stock Bajo:</strong> Entre 1 y 5 unidades
+                                            </li>
+                                            <li>
+                                                <span class="stock-indicator stock-zero"></span>
+                                                <strong>Sin Stock:</strong> 0 unidades
+                                            </li>
+                                        </ul>
                                     </div>
                                 </div>
                                 
