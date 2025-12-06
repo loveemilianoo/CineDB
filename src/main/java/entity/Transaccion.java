@@ -9,6 +9,7 @@ public class Transaccion {
     private BigDecimal total;
     private String metodoPago;
     
+    public Transaccion(){}
     public Transaccion(int idTransaccion, LocalDateTime fechaHora, BigDecimal total, String metodoPago) {
         this.idTransaccion = idTransaccion;
         this.fechaHora = fechaHora;

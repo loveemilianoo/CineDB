@@ -3,9 +3,6 @@
 <%@page import="java.math.BigDecimal"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
-    // ============================================
-    // 1. OBTENER ID DEL PRODUCTO A EDITAR
-    // ============================================
     String idParam = request.getParameter("id");
     Producto producto = null;
     ProductoDAO dao = new ProductoDAO();
@@ -15,13 +12,9 @@
             int idProducto = Integer.parseInt(idParam);
             producto = dao.getProductoPorId(idProducto);
         } catch (NumberFormatException e) {
-            // ID inválido
         }
     }
     
-    // ============================================
-    // 2. PROCESAR ACTUALIZACIÓN
-    // ============================================
     String mensaje = "";
     String tipoMensaje = "";
     
@@ -66,9 +59,6 @@
         }
     }
     
-    // ============================================
-    // 3. REDIRIGIR SI NO HAY PRODUCTO
-    // ============================================
     if(producto == null && !"POST".equals(request.getMethod())) {
         response.sendRedirect("frmListadoProducto.jsp");
         return;

@@ -70,26 +70,79 @@
             from { opacity: 0; }
             to { opacity: 1; }
         }
-        .quantity-options {
+        .ticket-type-card {
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+        .ticket-type-card.selected {
+            border-color: #28a745;
+            background-color: rgba(40, 167, 69, 0.05);
+        }
+        .ticket-type-header {
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .ticket-type-badge {
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            border-radius: 20px;
+        }
+        .quantity-selector {
+            display: flex;
+            align-items: center;
             justify-content: center;
-            margin: 20px 0;
+            gap: 10px;
         }
         .quantity-btn {
-            width: 50px;
-            height: 50px;
-            border: 2px solid #dee2e6;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
+            border: 2px solid #dee2e6;
             background: white;
             font-size: 1.2rem;
             font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .quantity-btn.selected {
-            border-color: #28a745;
-            background: #28a745;
+        .quantity-btn:hover {
+            border-color: #007bff;
+            color: #007bff;
+        }
+        .quantity-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            min-width: 50px;
+            text-align: center;
+        }
+        .ticket-price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #28a745;
+        }
+        .total-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+        .asiento-badge {
+            background: #6c757d;
             color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin: 3px;
+            display: inline-block;
+        }
+        .divider {
+            height: 1px;
+            background: #dee2e6;
+            margin: 20px 0;
         }
     </style>
 </head>
@@ -129,115 +182,181 @@
     int capacidadTotal = sala.getCapacidad();
     int asientosDisponibles = capacidadTotal - asientosOcupados.size();
     
-    // Precio fijo por boleto
-    BigDecimal precioPorBoleto = new BigDecimal("8.50");
+    // Precios por tipo de boleto
+    BigDecimal precioGeneral = new BigDecimal("8.50");
+    BigDecimal precioNino = new BigDecimal("5.50");
+    BigDecimal precioEstudiante = new BigDecimal("6.50");
     
-    // Procesar compra inmediata
-    String cantidadSeleccionada = "1"; // Valor por defecto
+    // Inicializar cantidades
+    int cantidadGeneral = 0;
+    int cantidadNino = 0;
+    int cantidadEstudiante = 0;
     
+    // Procesar compra
     if ("POST".equalsIgnoreCase(request.getMethod())) {
-        cantidadSeleccionada = request.getParameter("cantidad");
+        // Obtener cantidades del formulario
+        String generalStr = request.getParameter("cantidadGeneral");
+        String ninoStr = request.getParameter("cantidadNino");
+        String estudianteStr = request.getParameter("cantidadEstudiante");
         
-        if (cantidadSeleccionada != null && !cantidadSeleccionada.trim().isEmpty()) {
-            int cantidad = Integer.parseInt(cantidadSeleccionada);
+        if (generalStr != null && !generalStr.trim().isEmpty()) {
+            cantidadGeneral = Integer.parseInt(generalStr);
+        }
+        if (ninoStr != null && !ninoStr.trim().isEmpty()) {
+            cantidadNino = Integer.parseInt(ninoStr);
+        }
+        if (estudianteStr != null && !estudianteStr.trim().isEmpty()) {
+            cantidadEstudiante = Integer.parseInt(estudianteStr);
+        }
+        
+        int totalBoletos = cantidadGeneral + cantidadNino + cantidadEstudiante;
+        
+        // Verificar disponibilidad
+        if (totalBoletos > 0 && totalBoletos <= asientosDisponibles) {
+            // Generar asientos automáticamente
+            List<String> asientosAsignados = generarAsientosAutomaticos(idFuncion, totalBoletos, sala.getNumeroSala(), boletoDAO);
             
-            // Verificar disponibilidad
-            if (cantidad > 0 && cantidad <= asientosDisponibles) {
-                // Generar asientos automáticamente
-                List<String> asientosAsignados = generarAsientosAutomaticos(idFuncion, cantidad, sala.getNumeroSala(), boletoDAO);
-                
-                if (!asientosAsignados.isEmpty()) {
-                    try {
-                        // 1. Crear transacción primero
-                        TransaccionDAO transaccionDAO = new TransaccionDAO();
-                        BigDecimal total = precioPorBoleto.multiply(new BigDecimal(cantidad));
-                        Transaccion transaccion = new Transaccion(total, "efectivo");
+            if (!asientosAsignados.isEmpty()) {
+                try {
+                    // 1. Crear transacción
+                    TransaccionDAO transaccionDAO = new TransaccionDAO();
+                    
+                    // Calcular total
+                    BigDecimal totalGeneral = precioGeneral.multiply(new BigDecimal(cantidadGeneral));
+                    BigDecimal totalNino = precioNino.multiply(new BigDecimal(cantidadNino));
+                    BigDecimal totalEstudiante = precioEstudiante.multiply(new BigDecimal(cantidadEstudiante));
+                    BigDecimal total = totalGeneral.add(totalNino).add(totalEstudiante);
+                    
+                    Transaccion transaccion = new Transaccion();
+                    transaccion.setTotal(total);
+                    transaccion.setMetodoPago("efectivo");
+                    
+                    int idTransaccion = transaccionDAO.crearTransaccion(transaccion);
+                    
+                    if (idTransaccion > 0) {
+                        // 2. Crear boletos según tipo
+                        boolean todosGuardados = true;
+                        int asientoIndex = 0;
                         
-                        int idTransaccion = transaccionDAO.crearTransaccion(transaccion);
-                        
-                        if (idTransaccion > 0) {
-                            // 2. Crear y guardar boletos
-                            boolean todosGuardados = true;
-                            
-                            for (String asiento : asientosAsignados) {
+                        // Boletos General
+                        for (int i = 0; i < cantidadGeneral; i++) {
+                            if (asientoIndex < asientosAsignados.size()) {
                                 Boleto boleto = new Boleto();
                                 boleto.setIdFuncion(idFuncion);
                                 boleto.setIdTransaccion(idTransaccion);
-                                boleto.setPrecio(precioPorBoleto);
+                                boleto.setPrecio(precioGeneral);
                                 boleto.setTipoBoleto("general");
                                 boleto.setEstado("activo");
-                                boleto.setAsiento(asiento);
+                                boleto.setAsiento(asientosAsignados.get(asientoIndex));
                                 
                                 Boleto resultado = boletoDAO.insertarBoleto(boleto);
                                 if (resultado == null) {
                                     todosGuardados = false;
                                     break;
                                 }
+                                asientoIndex++;
                             }
-                            
-                            if (todosGuardados) {
-                                // Guardar datos para transacción
-                                session.setAttribute("compraExitosa", true);
-                                session.setAttribute("asientosAsignados", asientosAsignados);
-                                session.setAttribute("cantidadComprada", cantidad);
-                                session.setAttribute("totalCompra", total);
-                                session.setAttribute("idTransaccion", idTransaccion);
-                                session.setAttribute("idFuncion", idFuncion);
-                                session.setAttribute("idPelicula", idPelicula);
-                                session.setAttribute("tituloPelicula", tituloPelicula);
-                                session.setAttribute("fechaFuncion", fechaFuncion);
-                                session.setAttribute("horaFuncion", horaFuncion);
-                                session.setAttribute("numeroSala", sala.getNumeroSala());
-                                session.setAttribute("precioPorBoleto", precioPorBoleto);
+                        }
+                        
+                        // Boletos Niño
+                        for (int i = 0; i < cantidadNino; i++) {
+                            if (asientoIndex < asientosAsignados.size()) {
+                                Boleto boleto = new Boleto();
+                                boleto.setIdFuncion(idFuncion);
+                                boleto.setIdTransaccion(idTransaccion);
+                                boleto.setPrecio(precioNino);
+                                boleto.setTipoBoleto("niño");
+                                boleto.setEstado("activo");
+                                boleto.setAsiento(asientosAsignados.get(asientoIndex));
                                 
-                                // Redirigir directamente a transacción
-                                response.sendRedirect("frmTransaccion.jsp");
-                                return;
-                            } else {
-                                out.println("<div class='alert alert-danger alert-dismissible fade show' role='alert'>");
-                                out.println("<i class='fa-solid fa-triangle-exclamation me-2'></i>");
-                                out.println("<strong>Error:</strong> No se pudieron crear todos los boletos.");
-                                out.println("<button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>");
-                                out.println("</div>");
+                                Boleto resultado = boletoDAO.insertarBoleto(boleto);
+                                if (resultado == null) {
+                                    todosGuardados = false;
+                                    break;
+                                }
+                                asientoIndex++;
                             }
+                        }
+                        
+                        // Boletos Estudiante
+                        for (int i = 0; i < cantidadEstudiante; i++) {
+                            if (asientoIndex < asientosAsignados.size()) {
+                                Boleto boleto = new Boleto();
+                                boleto.setIdFuncion(idFuncion);
+                                boleto.setIdTransaccion(idTransaccion);
+                                boleto.setPrecio(precioEstudiante);
+                                boleto.setTipoBoleto("estudiante");
+                                boleto.setEstado("activo");
+                                boleto.setAsiento(asientosAsignados.get(asientoIndex));
+                                
+                                Boleto resultado = boletoDAO.insertarBoleto(boleto);
+                                if (resultado == null) {
+                                    todosGuardados = false;
+                                    break;
+                                }
+                                asientoIndex++;
+                            }
+                        }
+                        
+                        if (todosGuardados) {
+                            // Guardar datos para transacción
+                            session.setAttribute("compraExitosa", true);
+                            session.setAttribute("asientosAsignados", asientosAsignados);
+                            session.setAttribute("cantidadGeneral", cantidadGeneral);
+                            session.setAttribute("cantidadNino", cantidadNino);
+                            session.setAttribute("cantidadEstudiante", cantidadEstudiante);
+                            session.setAttribute("totalCompra", total);
+                            session.setAttribute("idTransaccion", idTransaccion);
+                            session.setAttribute("idFuncion", idFuncion);
+                            session.setAttribute("idPelicula", idPelicula);
+                            session.setAttribute("tituloPelicula", tituloPelicula);
+                            session.setAttribute("fechaFuncion", fechaFuncion);
+                            session.setAttribute("horaFuncion", horaFuncion);
+                            session.setAttribute("numeroSala", sala.getNumeroSala());
+                            session.setAttribute("precioGeneral", precioGeneral);
+                            session.setAttribute("precioNino", precioNino);
+                            session.setAttribute("precioEstudiante", precioEstudiante);
+                            
+                            // Redirigir a transacción exitosa
+                            response.sendRedirect("frmTransaccion.jsp");
+                            return;
                         } else {
                             out.println("<div class='alert alert-danger alert-dismissible fade show' role='alert'>");
                             out.println("<i class='fa-solid fa-triangle-exclamation me-2'></i>");
-                            out.println("<strong>Error:</strong> No se pudo crear la transacción.");
+                            out.println("<strong>Error:</strong> No se pudieron crear todos los boletos.");
                             out.println("<button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>");
                             out.println("</div>");
                         }
-                    } catch (Exception e) {
+                    } else {
                         out.println("<div class='alert alert-danger alert-dismissible fade show' role='alert'>");
                         out.println("<i class='fa-solid fa-triangle-exclamation me-2'></i>");
-                        out.println("<strong>Error:</strong> " + e.getMessage());
+                        out.println("<strong>Error:</strong> No se pudo crear la transacción.");
                         out.println("<button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>");
                         out.println("</div>");
-                        e.printStackTrace();
                     }
-                } else {
+                } catch (Exception e) {
                     out.println("<div class='alert alert-danger alert-dismissible fade show' role='alert'>");
                     out.println("<i class='fa-solid fa-triangle-exclamation me-2'></i>");
-                    out.println("<strong>Error:</strong> No se pudieron asignar asientos. Intenta con menos boletos.");
+                    out.println("<strong>Error:</strong> " + e.getMessage());
                     out.println("<button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>");
                     out.println("</div>");
+                    e.printStackTrace();
                 }
             } else {
                 out.println("<div class='alert alert-danger alert-dismissible fade show' role='alert'>");
                 out.println("<i class='fa-solid fa-triangle-exclamation me-2'></i>");
-                out.println("<strong>Error:</strong> Cantidad no válida o no hay suficientes asientos disponibles.");
+                out.println("<strong>Error:</strong> No se pudieron asignar asientos. Intenta con menos boletos.");
                 out.println("<button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>");
                 out.println("</div>");
             }
+        } else if (totalBoletos > asientosDisponibles) {
+            out.println("<div class='alert alert-danger alert-dismissible fade show' role='alert'>");
+            out.println("<i class='fa-solid fa-triangle-exclamation me-2'></i>");
+            out.println("<strong>Error:</strong> No hay suficientes asientos disponibles. Solo hay " + asientosDisponibles + " disponibles.");
+            out.println("<button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>");
+            out.println("</div>");
         }
     }
-    
-    // Calcular total basado en cantidad seleccionada
-    int cantidad = 1;
-    if (cantidadSeleccionada != null && !cantidadSeleccionada.trim().isEmpty()) {
-        cantidad = Integer.parseInt(cantidadSeleccionada);
-    }
-    BigDecimal totalCompra = precioPorBoleto.multiply(new BigDecimal(cantidad));
     %>
     
     <!-- Navigation -->
@@ -253,7 +372,7 @@
     <header class="hero-section text-center">
         <div class="container">
             <h1 class="display-4 fw-bold mb-3">🎫 Comprar Boletos</h1>
-            <p class="lead mb-0">Compra rápida y sencilla - Asignación automática de asientos</p>
+            <p class="lead mb-0">Selecciona el tipo y cantidad de boletos</p>
         </div>
     </header>
 
@@ -292,10 +411,9 @@
             <div class="col-lg-8">
                 <div class="ticket-card">
                     <div class="ticket-header">
-                        <h4 class="mb-0"><i class="fa-solid fa-shopping-cart me-2"></i>Comprar Boletos</h4>
+                        <h4 class="mb-0"><i class="fa-solid fa-shopping-cart me-2"></i>Selecciona tus Boletos</h4>
                     </div>
                     <div class="ticket-body">
-                        <!-- Formulario sin JavaScript -->
                         <form method="post" action="frmComprarBoletos.jsp">
                             <input type="hidden" name="idFuncion" value="<%= idFuncion %>">
                             <input type="hidden" name="idPelicula" value="<%= idPelicula %>">
@@ -304,94 +422,156 @@
                             <input type="hidden" name="horaFuncion" value="<%= horaFuncion %>">
                             <input type="hidden" name="idSala" value="<%= idSala %>">
                             
-                            <!-- Selector de cantidad -->
-                            <div class="text-center mb-5">
-                                <h5 class="mb-4">Selecciona la cantidad de boletos:</h5>
-                                
-                                <div class="quantity-options">
-                                    <% 
-                                    int maxMostrar = Math.min(10, asientosDisponibles);
-                                    for (int i = 1; i <= maxMostrar; i++) { 
-                                        boolean seleccionado = (i == cantidad);
-                                    %>
+                            <!-- Tipo de Boleto: General -->
+                            <div class="ticket-type-card <%= cantidadGeneral > 0 ? "selected" : "" %>">
+                                <div class="ticket-type-header">
                                     <div>
-                                        <% if (seleccionado) { %>
-                                        <span class="quantity-btn selected"><%= i %></span>
-                                        <input type="hidden" name="cantidad" value="<%= i %>">
-                                        <% } else { %>
-                                        <button type="submit" name="cantidad" value="<%= i %>" 
-                                                class="quantity-btn">
-                                            <%= i %>
-                                        </button>
-                                        <% } %>
+                                        <h5 class="mb-0">Boleto General</h5>
+                                        <span class="badge bg-primary ticket-type-badge">Adultos</span>
                                     </div>
-                                    <% } %>
-                                    
-                                    <% if (asientosDisponibles > 10) { %>
-                                    <div>
-                                        <% if (cantidad > 10) { %>
-                                        <span class="quantity-btn selected"><%= cantidad %></span>
-                                        <input type="hidden" name="cantidad" value="<%= cantidad %>">
-                                        <% } else { %>
-                                        <!-- Botón para abrir input personalizado -->
-                                        <button type="button" class="quantity-btn" 
-                                                onclick="document.getElementById('customQuantity').style.display='block'">
-                                            <i class="fa-solid fa-ellipsis-h"></i>
-                                        </button>
-                                        <% } %>
-                                    </div>
-                                    <% } %>
+                                    <span class="ticket-price">$<%= precioGeneral %></span>
                                 </div>
-                                
-                                <!-- Input personalizado para cantidades mayores a 10 -->
-                                <% if (cantidad > 10 || request.getParameter("showCustom") != null) { %>
-                                <div id="customQuantity" class="mt-3">
-                                    <label for="cantidadCustom" class="form-label">Especificar cantidad (máx <%= asientosDisponibles %>):</label>
-                                    <div class="input-group" style="max-width: 200px; margin: 0 auto;">
-                                        <input type="number" class="form-control" id="cantidadCustom" 
-                                               name="cantidad" value="<%= cantidad %>" min="1" max="<%= asientosDisponibles %>">
-                                        <button type="submit" class="btn btn-outline-primary">
-                                            <i class="fa-solid fa-check"></i>
-                                        </button>
-                                    </div>
+                                <p class="text-muted mb-3">
+                                    <i class="fa-solid fa-user me-1"></i>Para mayores de 13 años
+                                </p>
+                                <div class="quantity-selector">
+                                    <button type="submit" name="cantidadGeneral" value="<%= Math.max(0, cantidadGeneral - 1) %>" 
+                                            class="quantity-btn" <%= cantidadGeneral == 0 ? "disabled" : "" %>>
+                                        <i class="fa-solid fa-minus"></i>
+                                    </button>
+                                    <span class="quantity-display"><%= cantidadGeneral %></span>
+                                    <button type="submit" name="cantidadGeneral" value="<%= cantidadGeneral + 1 %>" 
+                                            class="quantity-btn" <%= (cantidadGeneral + cantidadNino + cantidadEstudiante) >= asientosDisponibles ? "disabled" : "" %>>
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
                                 </div>
-                                <% } %>
-                                
-                                <small class="text-muted mt-2 d-block">
-                                    Máximo <%= asientosDisponibles %> boletos disponibles
-                                </small>
                             </div>
                             
-                            <!-- Resumen de compra -->
-                            <div class="summary-box">
-                                <h5 class="mb-3"><i class="fa-solid fa-receipt me-2"></i>Resumen de Compra</h5>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <p class="mb-1"><strong>Precio unitario:</strong></p>
-                                        <h4 class="price-tag">$<%= precioPorBoleto %></h4>
+                            <!-- Tipo de Boleto: Niño -->
+                            <div class="ticket-type-card <%= cantidadNino > 0 ? "selected" : "" %>">
+                                <div class="ticket-type-header">
+                                    <div>
+                                        <h5 class="mb-0">Boleto Niño</h5>
+                                        <span class="badge bg-warning ticket-type-badge">3-12 años</span>
                                     </div>
+                                    <span class="ticket-price">$<%= precioNino %></span>
+                                </div>
+                                <p class="text-muted mb-3">
+                                    <i class="fa-solid fa-child me-1"></i>Para niños de 3 a 12 años (con identificación)
+                                </p>
+                                <div class="quantity-selector">
+                                    <button type="submit" name="cantidadNino" value="<%= Math.max(0, cantidadNino - 1) %>" 
+                                            class="quantity-btn" <%= cantidadNino == 0 ? "disabled" : "" %>>
+                                        <i class="fa-solid fa-minus"></i>
+                                    </button>
+                                    <span class="quantity-display"><%= cantidadNino %></span>
+                                    <button type="submit" name="cantidadNino" value="<%= cantidadNino + 1 %>" 
+                                            class="quantity-btn" <%= (cantidadGeneral + cantidadNino + cantidadEstudiante) >= asientosDisponibles ? "disabled" : "" %>>
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Tipo de Boleto: Estudiante -->
+                            <div class="ticket-type-card <%= cantidadEstudiante > 0 ? "selected" : "" %>">
+                                <div class="ticket-type-header">
+                                    <div>
+                                        <h5 class="mb-0">Boleto Estudiante</h5>
+                                        <span class="badge bg-info ticket-type-badge">Con carnet</span>
+                                    </div>
+                                    <span class="ticket-price">$<%= precioEstudiante %></span>
+                                </div>
+                                <p class="text-muted mb-3">
+                                    <i class="fa-solid fa-graduation-cap me-1"></i>Para estudiantes con carnet vigente
+                                </p>
+                                <div class="quantity-selector">
+                                    <button type="submit" name="cantidadEstudiante" value="<%= Math.max(0, cantidadEstudiante - 1) %>" 
+                                            class="quantity-btn" <%= cantidadEstudiante == 0 ? "disabled" : "" %>>
+                                        <i class="fa-solid fa-minus"></i>
+                                    </button>
+                                    <span class="quantity-display"><%= cantidadEstudiante %></span>
+                                    <button type="submit" name="cantidadEstudiante" value="<%= cantidadEstudiante + 1 %>" 
+                                            class="quantity-btn" <%= (cantidadGeneral + cantidadNino + cantidadEstudiante) >= asientosDisponibles ? "disabled" : "" %>>
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="divider"></div>
+                            
+                            <!-- Resumen y total -->
+                            <div class="total-section">
+                                <h5 class="mb-4"><i class="fa-solid fa-receipt me-2"></i>Resumen de Compra</h5>
+                                
+                                <% 
+                                BigDecimal subtotalGeneral = precioGeneral.multiply(new BigDecimal(cantidadGeneral));
+                                BigDecimal subtotalNino = precioNino.multiply(new BigDecimal(cantidadNino));
+                                BigDecimal subtotalEstudiante = precioEstudiante.multiply(new BigDecimal(cantidadEstudiante));
+                                BigDecimal totalCompra = subtotalGeneral.add(subtotalNino).add(subtotalEstudiante);
+                                int totalBoletos = cantidadGeneral + cantidadNino + cantidadEstudiante;
+                                %>
+                                
+                                <div class="row mb-3">
                                     <div class="col-md-6">
-                                        <p class="mb-1"><strong>Total:</strong></p>
-                                        <h3 class="text-success">$<%= totalCompra %></h3>
-                                        <p><small><%= cantidad %> boleto(s) x $<%= precioPorBoleto %></small></p>
+                                        <p class="mb-1">
+                                            <span class="badge bg-primary me-2">General</span>
+                                            <%= cantidadGeneral %> x $<%= precioGeneral %>
+                                        </p>
+                                        <p class="mb-1">
+                                            <span class="badge bg-warning me-2">Niño</span>
+                                            <%= cantidadNino %> x $<%= precioNino %>
+                                        </p>
+                                        <p class="mb-1">
+                                            <span class="badge bg-info me-2">Estudiante</span>
+                                            <%= cantidadEstudiante %> x $<%= precioEstudiante %>
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6 text-end">
+                                        <p class="mb-1">$<%= String.format("%.2f", subtotalGeneral) %></p>
+                                        <p class="mb-1">$<%= String.format("%.2f", subtotalNino) %></p>
+                                        <p class="mb-1">$<%= String.format("%.2f", subtotalEstudiante) %></p>
                                     </div>
                                 </div>
-                                <div class="mt-3">
-                                    <p class="mb-0 text-muted">
-                                        <i class="fa-solid fa-info-circle me-1"></i>
-                                        Los asientos serán asignados automáticamente por el sistema.
+                                
+                                <div class="row border-top pt-3">
+                                    <div class="col-md-6">
+                                        <h5>Total de boletos: <%= totalBoletos %></h5>
+                                    </div>
+                                    <div class="col-md-6 text-end">
+                                        <h3 class="text-success">$<%= String.format("%.2f", totalCompra) %></h3>
+                                    </div>
+                                </div>
+                                
+                                <!-- Información de asientos -->
+                                <div class="mt-4">
+                                    <p class="mb-2">
+                                        <i class="fa-solid fa-info-circle me-2"></i>
+                                        <strong>Información importante:</strong>
                                     </p>
+                                    <ul class="mb-0 small">
+                                        <li>Los asientos serán asignados automáticamente por el sistema</li>
+                                        <li>Se asignarán juntos en la medida de lo posible</li>
+                                        <li>No se pueden seleccionar asientos específicos</li>
+                                        <li>Asientos disponibles: <strong><%= asientosDisponibles %></strong></li>
+                                    </ul>
                                 </div>
                             </div>
                             
-                            <!-- Botón de compra inmediata -->
+                            <!-- Botón de compra -->
                             <div class="text-center mt-5">
-                                <button type="submit" class="btn btn-comprar btn-lg">
-                                    <i class="fa-solid fa-credit-card me-2"></i>Comprar Ahora
+                                <% if (totalBoletos > 0) { %>
+                                <button type="submit" name="comprar" value="true" class="btn btn-comprar btn-lg">
+                                    <i class="fa-solid fa-credit-card me-2"></i>Procesar Compra
                                 </button>
                                 <p class="text-muted mt-2 small">
-                                    Al hacer clic en "Comprar Ahora", se procesará tu compra inmediatamente.
+                                    Al hacer clic, se procesará tu compra y se asignarán los asientos automáticamente.
                                 </p>
+                                <% } else { %>
+                                <div class="alert alert-warning">
+                                    <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                                    Selecciona al menos un boleto para continuar
+                                </div>
+                                <% } %>
                             </div>
                         </form>
                     </div>
@@ -400,12 +580,12 @@
                 <!-- Información adicional -->
                 <div class="card border-0 shadow-sm mt-4">
                     <div class="card-body">
-                        <h5><i class="fa-solid fa-lightbulb me-2 text-warning"></i>Información importante</h5>
+                        <h5><i class="fa-solid fa-lightbulb me-2 text-warning"></i>Políticas de los boletos</h5>
                         <ul class="mt-3 mb-0">
-                            <li class="mb-2">Los boletos no son reembolsables</li>
-                            <li class="mb-2">Presenta tu código de confirmación en taquilla</li>
-                            <li class="mb-2">Llega 15 minutos antes de la función</li>
-                            <li>Los asientos se asignan para optimizar la experiencia de todos</li>
+                            <li class="mb-2"><strong>Boleto Niño:</strong> Requiere identificación que acredite la edad (3-12 años)</li>
+                            <li class="mb-2"><strong>Boleto Estudiante:</strong> Requiere carnet estudiantil vigente</li>
+                            <li class="mb-2">Los boletos no son reembolsables ni transferibles</li>
+                            <li>Presenta tu código de confirmación en taquilla 15 minutos antes</li>
                         </ul>
                     </div>
                 </div>
@@ -421,18 +601,11 @@
             </p>
         </div>
     </footer>
-
-    <!-- Script simple solo para mostrar/ocultar input personalizado -->
-    <script>
-        function mostrarInputPersonalizado() {
-            document.getElementById('customQuantity').style.display = 'block';
-        }
-    </script>
 </body>
 </html>
 
 <%!
-// Método para generar asientos automáticamente
+// Método para generar asientos automáticamente (el mismo que ya tenías)
 public List<String> generarAsientosAutomaticos(int idFuncion, int cantidad, int numeroSala, BoletoDAO boletoDAO) {
     List<String> asientosAsignados = new ArrayList<>();
     List<String> asientosOcupados = boletoDAO.getAsientosOcupados(idFuncion);
