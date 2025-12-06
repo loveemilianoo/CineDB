@@ -541,8 +541,7 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-6">
-                    <h5><i class="fa-solid fa-film me-2"></i>Cine Prototype</h5>
-                    <p class="mb-0">Más que cine, una experiencia.</p>
+                    <h5><i class="fa-solid fa-film me-2"></i>Sistema Cine</h5>
                 </div>
                 <div class="col-md-6 text-end">
                     <div class="btn-group">
@@ -557,12 +556,6 @@
                         </a>
                     </div>
                 </div>
-            </div>
-            <hr class="my-3">
-            <div class="text-center">
-                <p class="mb-0">© 2024 Cine. Sistema desarrollado con Java JSP y PostgreSQL</p>
-            </div>
-        </div>
     </footer>
 
     <!-- Bootstrap JS (solo para componentes) -->

@@ -383,12 +383,6 @@
                         </a>
                     </div>
                 </div>
-            </div>
-            <hr class="my-3">
-            <div class="text-center">
-                <p class="mb-0">© 2024 Cine Prototype. Sistema desarrollado con Java JSP y PostgreSQL</p>
-            </div>
-        </div>
     </footer>
 
     <!-- Bootstrap JS (solo para componentes de Bootstrap) -->
