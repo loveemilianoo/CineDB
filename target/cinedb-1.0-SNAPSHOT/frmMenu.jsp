@@ -112,7 +112,7 @@
               </div>
               <h3 class="card-title mb-3">Comprar Boletos</h3>
               <p class="card-text text-muted mb-4">
-                Selecciona tu película, función y asiento preferido. Vive la experiencia completa del cine.
+                Selecciona tu película y función.
               </p>
               <a href="frmSeleccionarPelicula.jsp" class="btn btn-primary btn-action w-100">
                 <i class="fa-solid fa-clapperboard me-2"></i>Comprar Boletos
@@ -130,7 +130,7 @@
               </div>
               <h3 class="card-title mb-3">Comprar Comida</h3>
               <p class="card-text text-muted mb-4">
-                Disfruta de nuestros deliciosos combos, snacks y bebidas. El complemento perfecto para tu película.
+                Disfruta de deliciosos combos, snacks y bebidas.
               </p>
               <a href="frmSeleccionarComida.jsp" class="btn btn-success btn-action w-100">
                 <i class="fa-solid fa-utensils me-2"></i>Ordenar Comida
@@ -148,7 +148,7 @@
               </div>
               <h3 class="card-title mb-3">Administrar Sistema</h3>
               <p class="card-text text-muted mb-4">
-                Gestiona películas, productos, funciones y más. Panel de control completo del cine.
+                Gestiona películas, productos y salas.
               </p>
               <div class="dropdown">
                 <button class="btn btn-warning btn-action w-100 dropdown-toggle" type="button" data-bs-toggle="dropdown">
@@ -187,12 +187,6 @@
               </a>
             </div>
           </div>
-        </div>
-        <hr class="my-3">
-        <div class="text-center">
-          <p class="mb-0">© 2024 Cine Prototype. Sistema desarrollado con Java JSP y PostgreSQL</p>
-        </div>
-      </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

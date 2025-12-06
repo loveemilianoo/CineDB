@@ -225,9 +225,9 @@
     int asientosDisponibles = capacidadTotal - asientosOcupados.size();
     
     // Precios por tipo de boleto
-    BigDecimal precioGeneral = new BigDecimal("8.50");
-    BigDecimal precioNino = new BigDecimal("5.50");
-    BigDecimal precioEstudiante = new BigDecimal("6.50");
+    BigDecimal precioGeneral = new BigDecimal("75");
+    BigDecimal precioNino = new BigDecimal("55");
+    BigDecimal precioEstudiante = new BigDecimal("65");
     
     // Inicializar cantidades desde parámetros o inicializar en 0
     int cantidadGeneral = 0;
