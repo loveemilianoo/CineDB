@@ -71,44 +71,4 @@ public class BoletoDAO {
         }
         return boleto;
     }
-    
-    public List<Boleto> getBoletosPorTransaccion(int idTransaccion) {
-    List<Boleto> boletos = new ArrayList<>();
-    ResultSet rs = null;
-    Connection conn = null;
-    PreparedStatement ps = null;
-            
-    try {
-        conn = new Conexion().getConexion();
-        String query = "SELECT * FROM tablas.boleto WHERE id_transaccion = ?";
-        ps = conn.prepareStatement(query);
-        ps.setInt(1, idTransaccion);
-        rs = ps.executeQuery();
-        
-        while (rs.next()) {
-            Boleto boleto = new Boleto();
-            boleto.setIdBoleto(rs.getInt("id_boleto"));
-            boleto.setIdFuncion(rs.getInt("id_funcion"));
-            boleto.setIdTransaccion(rs.getInt("id_transaccion"));
-            boleto.setPrecio(rs.getBigDecimal("precio"));
-            boleto.setTipoBoleto(rs.getString("tipo_boleto"));
-            boleto.setEstado(rs.getString("estado"));
-            boleto.setAsiento(rs.getString("asiento"));
-            
-            boletos.add(boleto);
-        }
-    } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Error " + e.toString());
-        } finally {
-            try {
-                if (rs != null)rs.close();
-                if (ps != null)ps.close();
-                if (conn != null) conn.close();
-            } catch (SQLException e) {
-                System.out.println("Error al cerrar recursos " + e.toString());
-            }
-        }
-        return boletos;
-    }
 }
