@@ -187,7 +187,7 @@
     <main class="container my-5">
         <!-- Barra de búsqueda -->
         <div class="row mb-4">
-            <div class="col-md-8">
+            <div class="row mb-4 justify-content-center">
                 <!-- Formulario de búsqueda -->
                 <form method="GET" action="frmListadoProductoSinStock.jsp" class="search-box">
                     <div class="input-group">
@@ -217,8 +217,8 @@
         </div>
 
         <!-- Estadísticas simplificadas -->
-        <div class="row mb-4">
-            <div class="col-md-6">
+        <div class="row mb-4 justify-content-center">
+            <div class="col-md-6 justify-content-center">
                 <div class="card stats-card border-start border-primary border-4">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
@@ -347,8 +347,8 @@
                                 <i class="fa-solid fa-circle-info me-2"></i>Información del Catálogo
                             </h6>
                             <p class="mb-0">
-                                <i class="fa-solid fa-circle status-available me-1"></i>Disponible | 
-                                <i class="fa-solid fa-circle status-unavailable ms-3 me-1"></i>No disponible
+                                <span class="product-status status-available me-1"></span>Disponible | 
+                                <span class="product-status status-unavailable ms-3 me-1"></span>No disponible
                             </p>
                         </div>
                         <div>

@@ -25,8 +25,8 @@
                 ProductoDAO dao = new ProductoDAO();
                 dao.insertarProducto(producto);
                 
-                // Redirigir al listado sin stock
-                response.sendRedirect("frmListadoProductoSinStock.jsp");
+                // Redirigir al listado
+                response.sendRedirect("frmListadoProducto.jsp");
                 return;
             }
         } catch (NumberFormatException e) {
@@ -127,14 +127,14 @@
     </nav>
 
     <!-- Header -->
-    <header class="hero-section">
-        <div class="container">
-            <div class="hero-content">
-                <h1 class="display-4 fw-bold mb-3">Nuevo Producto</h1>
-                <p class="lead mb-0">Agrega un producto al catálogo</p>
-            </div>
+<header class="hero-section">
+    <div class="container">
+        <div class="hero-content d-flex flex-column align-items-center justify-content-center text-center">
+            <h1 class="display-4 fw-bold mb-3">Nuevo Producto</h1>
+            <p class="lead mb-0">Agrega un producto al catálogo</p>
         </div>
-    </header>
+    </div>
+</header>
 
     <main class="container my-5">
         <div class="row justify-content-center">
@@ -148,7 +148,7 @@
                         <h2 class="card-title text-center mb-4">Información Básica del Producto</h2>
                         
                         <div class="simple-form">
-                            <form method="POST" action="frmGuardaProductoSinStock.jsp">
+                            <form method="POST" action="frmGuardaProducto.jsp">
                                 <!-- Nombre del Producto -->
                                 <div class="mb-4">
                                     <label for="nombre" class="form-label required-field fw-bold">
@@ -215,13 +215,10 @@
                                 
                                 <!-- Botones de acción -->
                                 <div class="d-flex justify-content-between mt-4 pt-3 border-top">
-                                    <a href="frmListadoProductoSinStock.jsp" class="btn btn-outline-secondary">
+                                    <a href="frmListadoProducto.jsp" class="btn btn-outline-secondary">
                                         <i class="fa-solid fa-arrow-left me-2"></i>Cancelar
                                     </a>
                                     <div>
-                                        <a href="frmGuardaProducto.jsp" class="btn btn-outline-primary me-2">
-                                            <i class="fa-solid fa-boxes-stacked me-2"></i>Versión con Stock
-                                        </a>
                                         <button type="submit" class="btn btn-success">
                                             <i class="fa-solid fa-floppy-disk me-2"></i>Guardar Producto
                                         </button>
@@ -248,7 +245,7 @@
                         <a href="frmSeleccionarPelicula.jsp" class="btn btn-outline-light btn-sm">
                             <i class="fa-solid fa-ticket me-1"></i>Boletos
                         </a>
-                        <a href="frmListadoProductoSinStock.jsp" class="btn btn-outline-light btn-sm">
+                        <a href="frmListadoProducto.jsp" class="btn btn-outline-light btn-sm">
                             <i class="fa-solid fa-popcorn me-1"></i>Productos
                         </a>
                         <a href="frmMenu.jsp" class="btn btn-outline-light btn-sm">
