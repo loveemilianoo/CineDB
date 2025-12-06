@@ -560,22 +560,22 @@
                             <!-- Botón de compra -->
                             <div class="text-center mt-5">
                                 <% if (totalBoletos > 0) { %>
-                                <button type="submit" name="comprar" value="true" class="btn btn-comprar btn-lg">
-                                    <i class="fa-solid fa-credit-card me-2"></i>Procesar Compra
+                                <!-- Agrega un input hidden para identificar la acción -->
+                                <input type="hidden" name="accion" value="comprar">
+    
+                                <button type="submit" class="btn btn-comprar btn-lg">
+                                <i class="fa-solid fa-credit-card me-2"></i>Procesar Compra
                                 </button>
                                 <p class="text-muted mt-2 small">
                                     Al hacer clic, se procesará tu compra y se asignarán los asientos automáticamente.
                                 </p>
                                 <% } else { %>
-                                <div class="alert alert-warning">
-                                    <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                            <div class="alert alert-warning">
+                                <i class="fa-solid fa-exclamation-triangle me-2"></i>
                                     Selecciona al menos un boleto para continuar
-                                </div>
+                            </div>
                                 <% } %>
                             </div>
-                        </form>
-                    </div>
-                </div>
                 
                 <!-- Información adicional -->
                 <div class="card border-0 shadow-sm mt-4">
