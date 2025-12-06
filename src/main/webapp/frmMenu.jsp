@@ -116,7 +116,7 @@
           <div class="card action-card h-100 text-center border-success">
             <div class="card-body p-4">
               <div class="action-icon text-success">
-                <i class="fa-solid fa-popcorn"></i>
+                <i class="fa-solid fa-utensils"></i>
               </div>
               <h3 class="card-title mb-3">Comprar Comida</h3>
               <p class="card-text text-muted mb-4">
