@@ -4,14 +4,59 @@
     Author     : famil
 --%>
 
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
-<!DOCTYPE html>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@page import="java.util.List"%>
+<%@page import="dao.SalaDAO"%>
+<%@page import="entity.Sala"%>
+
+<%
+    String action = request.getParameter("action");
+    if ("delete".equals(action)) {
+        int id = Integer.parseInt(request.getParameter("id"));
+        new SalaDAO().eliminarSala(id);
+        response.sendRedirect("frmListadoSala.jsp");
+        return;
+    }
+
+    SalaDAO dao = new SalaDAO();
+      List<Sala> lista = dao.getSalas();
+
+%>
+
 <html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>JSP Page</title>
-    </head>
-    <body>
-        <h1>Hello World!</h1>
-    </body>
+<head>
+    <title>Listado de Salas</title>
+</head>
+<body>
+    <h1>Salas</h1>
+
+    <a href="frmInsertarSala.jsp">Agregar Sala</a>
+    <br><br>
+
+    <table border="1" cellpadding="5">
+        <tr>
+            <th>ID</th>
+            <th>Número</th>
+            <th>Capacidad</th>
+            <th>Acciones</th>
+        </tr>
+
+        <%
+            for (Sala s : lista) {
+        %>
+        <tr>
+            <td><%= s.getIdSala() %></td>
+            <td><%= s.getNumeroSala() %></td>
+            <td><%= s.getCapacidad() %></td>
+            <td>
+                <a href="frmEditarSala.jsp?id=<%=s.getIdSala()%>">Editar</a> |
+                <a href="frmListadoSala.jsp?action=delete&id=<%=s.getIdSala()%>"
+                   onclick="return confirm('¿Eliminar sala?');">Eliminar</a>
+            </td>
+        </tr>
+        <%
+            }
+        %>
+    </table>
+</body>
 </html>

@@ -318,7 +318,7 @@
                             session.setAttribute("precioEstudiante", precioEstudiante);
                             
                             // Redirigir a transacción exitosa
-                            response.sendRedirect("frmTransaccion.jsp");
+                            response.sendRedirect("frmTransaccionBoleto.jsp?idTransaccion=" + idTransaccion);
                             return;
                         } else {
                             out.println("<div class='alert alert-danger alert-dismissible fade show' role='alert'>");

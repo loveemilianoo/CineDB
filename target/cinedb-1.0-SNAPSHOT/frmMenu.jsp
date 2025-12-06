@@ -72,7 +72,7 @@
           <ul class="navbar-nav ms-auto">
             <li class="nav-item"><a class="nav-link active" href="frmMenu.jsp">Inicio</a></li>
             <li class="nav-item"><a class="nav-link" href="frmSeleccionarPelicula.jsp">Boletos</a></li>
-            <li class="nav-item"><a class="nav-link" href="#">Comida</a></li>
+            <li class="nav-item"><a class="nav-link" href="frmSeleccionarComida.jsp">Comida</a></li>
             <li class="nav-item"><a class="nav-link" href="frmListadoPeliculas.jsp">Administrar</a></li>
           </ul>
         </div>

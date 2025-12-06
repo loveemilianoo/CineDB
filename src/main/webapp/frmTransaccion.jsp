@@ -1,7 +1,5 @@
 <%@page import="java.math.BigDecimal"%>
 <%@page import="java.util.List"%>
-<%@page import="dao.ProductoDAO"%>
-<%@page import="entity.Producto"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="es">
@@ -78,18 +76,6 @@
             padding: 20px;
             margin-top: 20px;
         }
-        .ticket-type-badge {
-            font-size: 0.8rem;
-            padding: 3px 8px;
-            border-radius: 12px;
-            margin-right: 5px;
-        }
-        .ticket-summary {
-            background: #e9ecef;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 10px 0;
-        }
     </style>
 </head>
 <body>
@@ -97,30 +83,13 @@
     // Obtener datos de la compra desde sesión
     Boolean compraExitosa = (Boolean) session.getAttribute("compraExitosa");
     List<String> asientosAsignados = (List<String>) session.getAttribute("asientosAsignados");
-    
-    // Cantidades por tipo de boleto
-    Integer cantidadGeneral = (Integer) session.getAttribute("cantidadGeneral");
-    Integer cantidadNino = (Integer) session.getAttribute("cantidadNino");
-    Integer cantidadEstudiante = (Integer) session.getAttribute("cantidadEstudiante");
-    
+    Integer cantidadComprada = (Integer) session.getAttribute("cantidadComprada");
     BigDecimal totalCompra = (BigDecimal) session.getAttribute("totalCompra");
     String tituloPelicula = (String) session.getAttribute("tituloPelicula");
     String fechaFuncion = (String) session.getAttribute("fechaFuncion");
     String horaFuncion = (String) session.getAttribute("horaFuncion");
     Integer numeroSala = (Integer) session.getAttribute("numeroSala");
-    
-    // Precios por tipo
-    BigDecimal precioGeneral = (BigDecimal) session.getAttribute("precioGeneral");
-    BigDecimal precioNino = (BigDecimal) session.getAttribute("precioNino");
-    BigDecimal precioEstudiante = (BigDecimal) session.getAttribute("precioEstudiante");
-    
-    // Asegurar que las cantidades no sean null
-    if (cantidadGeneral == null) cantidadGeneral = 0;
-    if (cantidadNino == null) cantidadNino = 0;
-    if (cantidadEstudiante == null) cantidadEstudiante = 0;
-    
-    // Calcular total de boletos
-    int totalBoletos = cantidadGeneral + cantidadNino + cantidadEstudiante;
+    BigDecimal precioPorBoleto = (BigDecimal) session.getAttribute("precioPorBoleto");
     
     // Verificar si hay datos de compra
     if (compraExitosa == null || !compraExitosa) {
@@ -130,6 +99,19 @@
     
     // Generar código de confirmación único
     String codigoConfirmacion = "CINE-" + System.currentTimeMillis();
+    
+    // Limpiar sesión después de mostrar
+    session.removeAttribute("compraExitosa");
+    session.removeAttribute("asientosAsignados");
+    session.removeAttribute("cantidadComprada");
+    session.removeAttribute("totalCompra");
+    session.removeAttribute("idFuncion");
+    session.removeAttribute("idPelicula");
+    session.removeAttribute("tituloPelicula");
+    session.removeAttribute("fechaFuncion");
+    session.removeAttribute("horaFuncion");
+    session.removeAttribute("numeroSala");
+    session.removeAttribute("precioPorBoleto");
     %>
     
     <!-- Navigation -->
@@ -164,10 +146,10 @@
                         <div class="text-center mb-4">
                             <span class="ticket-badge">
                                 <i class="fa-solid fa-ticket me-1"></i>
-                                <%= totalBoletos %> Boleto(s) Comprado(s)
+                                <%= cantidadComprada %> Boleto(s) Comprado(s)
                             </span>
                         </div>
-
+                        
                         <!-- Código de confirmación -->
                         <div class="text-center mb-5">
                             <h5 class="mb-3">Código de Confirmación</h5>
@@ -179,11 +161,11 @@
                                 Presenta este código en taquilla para reclamar tus boletos
                             </p>
                         </div>
-
+                        
                         <!-- Detalles de la transacción -->
                         <div class="transaction-details">
                             <h5 class="mb-4"><i class="fa-solid fa-clipboard-list me-2"></i>Detalles de la Compra</h5>
-
+                            
                             <div class="row">
                                 <div class="col-md-6">
                                     <p><strong><i class="fa-solid fa-film me-2"></i>Película:</strong><br>
@@ -197,29 +179,8 @@
                                 </div>
                                 
                                 <div class="col-md-6">
-                                    <!-- Detalle por tipo de boleto -->
-                                    <div class="ticket-summary">
-                                        <% if (cantidadGeneral > 0) { %>
-                                        <p class="mb-1">
-                                            <span class="badge bg-primary ticket-type-badge">General</span>
-                                            <%= cantidadGeneral %> x $<%= precioGeneral %> = $<%= precioGeneral.multiply(new BigDecimal(cantidadGeneral)) %>
-                                        </p>
-                                        <% } %>
-                                        
-                                        <% if (cantidadNino > 0) { %>
-                                        <p class="mb-1">
-                                            <span class="badge bg-warning ticket-type-badge">Niño</span>
-                                            <%= cantidadNino %> x $<%= precioNino %> = $<%= precioNino.multiply(new BigDecimal(cantidadNino)) %>
-                                        </p>
-                                        <% } %>
-                                        
-                                        <% if (cantidadEstudiante > 0) { %>
-                                        <p class="mb-1">
-                                            <span class="badge bg-info ticket-type-badge">Estudiante</span>
-                                            <%= cantidadEstudiante %> x $<%= precioEstudiante %> = $<%= precioEstudiante.multiply(new BigDecimal(cantidadEstudiante)) %>
-                                        </p>
-                                        <% } %>
-                                    </div>
+                                    <p><strong><i class="fa-solid fa-ticket me-2"></i>Boletos:</strong><br>
+                                    <%= cantidadComprada %> x $<%= precioPorBoleto %></p>
                                     
                                     <p><strong><i class="fa-solid fa-money-bill-wave me-2"></i>Total Pagado:</strong><br>
                                     <h4 class="text-success">$<%= totalCompra %></h4></p>
@@ -228,7 +189,7 @@
                                     <%= new java.util.Date() %></p>
                                 </div>
                             </div>
-
+                            
                             <!-- Asientos asignados -->
                             <div class="mt-4">
                                 <p class="mb-2"><strong><i class="fa-solid fa-chair me-2"></i>Asientos Asignados:</strong></p>
@@ -249,140 +210,17 @@
                                 </p>
                             </div>
                         </div>
-
-                        <!-- Productos Disponibles (Comida) - OPCIONAL -->
-                        <div class="mt-5">
-                            <h5 class="mb-4"><i class="fa-solid fa-burger me-2"></i>Complementa tu experiencia</h5>
-                            <p class="text-muted mb-3">¡No te quedes con hambre! Estos son los productos disponibles en dulcería:</p>
-
-                            <div class="row">
-                                <% 
-                                // Obtener productos directamente (sin Servlet)
-                                ProductoDAO productoDAO = new ProductoDAO();
-                                List<Producto> productos = productoDAO.getProductos();
-                                
-                                if (productos != null && !productos.isEmpty()) {
-                                    // Mostrar solo productos con stock
-                                    int productosConStock = 0;
-                                    for (Producto prod : productos) {
-                                        if (prod.getStock() > 0) {
-                                            productosConStock++;
-                                %>
-                                <div class="col-md-6 mb-3">
-                                    <div class="d-flex align-items-center p-3 border rounded bg-white">
-                                        <div class="me-3 text-warning">
-                                            <i class="fa-solid fa-utensils fa-2x"></i>
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <h6 class="mb-0"><%= prod.getNombre() %></h6>
-                                            <small class="text-muted">Stock: <%= prod.getStock() %></small>
-                                        </div>
-                                        <div class="text-end">
-                                            <span class="fw-bold text-success">$<%= prod.getPrecioVenta() %></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <%
-                                        }
-                                    }
-                                    
-                                    if (productosConStock == 0) {
-                                %>
-                                <div class="col-12">
-                                    <div class="alert alert-light text-center">
-                                        <i class="fa-solid fa-store-slash me-2"></i>No hay productos disponibles en este momento.
-                                    </div>
-                                </div>
-                                <%
-                                    }
-                                } else {
-                                %>
-                                <div class="col-12">
-                                    <div class="alert alert-light text-center">
-                                        <i class="fa-solid fa-store-slash me-2"></i>No hay productos disponibles en este momento.
-                                    </div>
-                                </div>
-                                <% } %>
-                            </div>
-                            
-                            <!-- Botón para ir a comprar comida -->
-                            <div class="text-center mt-3">
-                                <a href="frmSeleccionarComida.jsp" class="btn btn-warning">
-                                    <i class="fa-solid fa-cart-shopping me-2"></i>Comprar Comida y Bebidas
-                                </a>
-                            </div>
+                        
+                        <!-- Instrucciones -->
+                        <div class="alert alert-info mt-4">
+                            <h6><i class="fa-solid fa-clipboard-check me-2"></i>Instrucciones Importantes:</h6>
+                            <ul class="mb-0">
+                                <li>Llega al cine 15 minutos antes de la función</li>
+                                <li>Presenta tu código de confirmación en taquilla</li>
+                                <li>Guarda este comprobante, no es reembolsable</li>
+                                <li>Los asientos asignados no pueden cambiarse</li>
+                            </ul>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Instrucciones -->
-                <div class="alert alert-info mt-4">
-                    <h6><i class="fa-solid fa-clipboard-check me-2"></i>Instrucciones Importantes:</h6>
-                    <ul class="mb-0">
-                        <li>Llega al cine 15 minutos antes de la función</li>
-                        <li>Presenta tu código de confirmación en taquilla</li>
-                        <li>Guarda este comprobante, no es reembolsable</li>
-                        <li>Los asientos asignados no pueden cambiarse</li>
-                        <li>Para boletos de niño/estudiante, presenta identificación</li>
-                    </ul>
-                </div>
-
-                <!-- Botones de acción -->
-                <div class="d-flex justify-content-between mt-4">
-                    <a href="frmMenu.jsp" class="btn btn-outline-secondary">
-                        <i class="fa-solid fa-home me-2"></i>Volver al Inicio
-                    </a>
-                    <div>
-                        <button onclick="window.print()" class="btn btn-print me-2">
-                            <i class="fa-solid fa-print me-2"></i>Imprimir Comprobante
-                        </button>
-                        <a href="frmSeleccionarPelicula.jsp" class="btn btn-success">
-                            <i class="fa-solid fa-ticket me-2"></i>Comprar Más Boletos
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-dark text-white py-4 mt-5">
-        <div class="container text-center">
-            <p class="mb-0">
-                <i class="fa-solid fa-film me-2"></i>Sistema de Cine &copy; 2024
-            </p>
-        </div>
-    </footer>
-
-    <!-- Script simple para impresión -->
-    <script>
-        // Auto-scroll al inicio después de imprimir
-        window.onafterprint = function() {
-            window.scrollTo(0, 0);
-        };
-    </script>
-</body>
-</html>
-
-<%
-// Limpiar sesión después de mostrar (solo si estamos seguros de que se mostró)
-try {
-    session.removeAttribute("compraExitosa");
-    session.removeAttribute("asientosAsignados");
-    session.removeAttribute("cantidadGeneral");
-    session.removeAttribute("cantidadNino");
-    session.removeAttribute("cantidadEstudiante");
-    session.removeAttribute("totalCompra");
-    session.removeAttribute("idFuncion");
-    session.removeAttribute("idPelicula");
-    session.removeAttribute("tituloPelicula");
-    session.removeAttribute("fechaFuncion");
-    session.removeAttribute("horaFuncion");
-    session.removeAttribute("numeroSala");
-    session.removeAttribute("precioGeneral");
-    session.removeAttribute("precioNino");
-    session.removeAttribute("precioEstudiante");
-} catch (Exception e) {
-    // Ignorar errores al limpiar sesión
-}
-%>
+                            
+                            <a href="frmSeleccionarPelicula.jsp" class="btn btn-success">
+                                <i class="fa-solid fa-ticket me-2"></
