@@ -76,12 +76,11 @@ public class BoletoDAO {
     List<Boleto> boletos = new ArrayList<>();
     ResultSet rs = null;
     Connection conn = null;
-    Conexion conexion = new Conexion ();
     PreparedStatement ps = null;
             
     try {
-        
-        String query = "SELECT * FROM tables.boleto WHERE id_transaccion = ?";
+        conn = new Conexion().getConexion();
+        String query = "SELECT * FROM tablas.boleto WHERE id_transaccion = ?";
         ps = conn.prepareStatement(query);
         ps.setInt(1, idTransaccion);
         rs = ps.executeQuery();

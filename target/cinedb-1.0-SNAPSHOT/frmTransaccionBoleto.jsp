@@ -288,14 +288,7 @@
                         %>
                     </div>
                 </div>
-                
-                <!-- QR Code Placeholder -->
-                <div class="qr-container">
-                    <i class="fa-solid fa-qrcode fa-5x text-muted mb-3"></i>
-                    <p class="text-muted mb-0">Escanea este código en la entrada</p>
-                    <small class="text-muted">Código: <%= ticketCode %></small>
-                </div>
-                
+                    
                 <!-- Total -->
                 <div class="text-center mt-4">
                     <h4 class="mb-3">Total Pagado</h4>
@@ -306,42 +299,12 @@
                     </p>
                 </div>
             </div>
-            
-            <!-- Pie del Ticket con instrucciones -->
-            <div class="ticket-footer">
-                <div class="instructions">
-                    <h6><i class="fa-solid fa-circle-info me-2"></i>Instrucciones para ingresar:</h6>
-                    <ol class="mb-0">
-                        <li>Presenta este comprobante en la entrada</li>
-                        <li>Llega 15 minutos antes de la función (<strong><%= horaFuncion %></strong>)</li>
-                        <li>Muestra identificación para boletos de niño/estudiante</li>
-                        <li>Conserva este ticket, es tu comprobante</li>
-                    </ol>
-                </div>
-                
-                <!-- Información de contacto -->
-                <div class="text-center mt-3">
-                    <small class="text-muted">
-                        <i class="fa-solid fa-phone me-1"></i>Teléfono: 1234-5678 | 
-                        <i class="fa-solid fa-envelope ms-2 me-1"></i>info@cine.com
-                    </small>
-                    <p class="text-muted mt-1 mb-0">
-                        <i class="fa-solid fa-calendar-day me-1"></i>Fecha de emisión: <%= new java.util.Date() %>
-                    </p>
-                </div>
-            </div>
-        </div>
         
         <!-- Botones de acción -->
         <div class="text-center mt-5">
-            <button onclick="window.print()" class="btn print-ticket me-3">
-                <i class="fa-solid fa-print me-2"></i>Imprimir Ticket
-            </button>
-            
             <a href="frmMenu.jsp" class="btn btn-outline-primary">
                 <i class="fa-solid fa-home me-2"></i>Volver al Inicio
             </a>
-            
             <a href="frmSeleccionarPelicula.jsp" class="btn btn-success ms-3">
                 <i class="fa-solid fa-ticket me-2"></i>Comprar Más Boletos
             </a>
@@ -357,7 +320,7 @@
                     <h6 class="alert-heading">Importante para el acceso:</h6>
                     <p class="mb-0">
                         Este comprobante contiene el código <strong><%= ticketCode %></strong> que será verificado en la entrada.
-                        Cada boleto tiene asignado un asiento específico (mostrado arriba) que no puede ser cambiado.
+                        Cada boleto tiene asignado un asiento específico que no puede ser cambiado.
                         Para boletos de niño o estudiante, se debe presentar identificación válida.
                     </p>
                 </div>
@@ -369,45 +332,10 @@
     <footer class="bg-dark text-white py-4 mt-5">
         <div class="container text-center">
             <p class="mb-0">
-                <i class="fa-solid fa-film me-2"></i>Sistema de Cine &copy; 2024
+                <i class="fa-solid fa-film me-2"></i>Sistema de Cine
             </p>
         </div>
     </footer>
-
-    <!-- Script para impresión -->
-    <script>
-        // Mejorar la experiencia de impresión
-        function imprimirTicket() {
-            // Guardar el HTML original
-            var originalContent = document.body.innerHTML;
-            
-            // Obtener solo el contenido del ticket
-            var ticketContent = document.querySelector('.ticket-card').outerHTML;
-            
-            // Reemplazar todo el body con solo el ticket
-            document.body.innerHTML = ticketContent;
-            
-            // Agregar estilos para impresión
-            var style = document.createElement('style');
-            style.innerHTML = `
-                @media print {
-                    body { margin: 0; padding: 10px; }
-                    .ticket-card { border: 2px solid #000 !important; box-shadow: none !important; }
-                    .no-print { display: none !important; }
-                }
-            `;
-            document.head.appendChild(style);
-            
-            // Imprimir
-            window.print();
-            
-            // Restaurar contenido original
-            document.body.innerHTML = originalContent;
-            window.location.reload();
-        }
-        
-        // Reemplazar la función de impresión predeterminada
-        document.querySelector('.print-ticket').onclick = imprimirTicket;
-    </script>
+    
 </body>
 </html>
