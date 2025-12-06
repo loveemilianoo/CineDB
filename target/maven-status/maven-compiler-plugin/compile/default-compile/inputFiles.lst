@@ -1,8 +1,5 @@
-C:\Users\famil\OneDrive\Documentos\NetBeansProjects\cinedb\src\main\java\com\mycompany\cinedb\JakartaRestConfiguration.java
-C:\Users\famil\OneDrive\Documentos\NetBeansProjects\cinedb\src\main\java\com\mycompany\cinedb\resources\JakartaEE11Resource.java
 C:\Users\famil\OneDrive\Documentos\NetBeansProjects\cinedb\src\main\java\conexion\Conexion.java
 C:\Users\famil\OneDrive\Documentos\NetBeansProjects\cinedb\src\main\java\conexion\Main.java
-C:\Users\famil\OneDrive\Documentos\NetBeansProjects\cinedb\src\main\java\dao\AsientoDAO.java
 C:\Users\famil\OneDrive\Documentos\NetBeansProjects\cinedb\src\main\java\dao\BoletoDAO.java
 C:\Users\famil\OneDrive\Documentos\NetBeansProjects\cinedb\src\main\java\dao\DetalleProductoDAO.java
 C:\Users\famil\OneDrive\Documentos\NetBeansProjects\cinedb\src\main\java\dao\FuncionDAO.java
@@ -10,7 +7,6 @@ C:\Users\famil\OneDrive\Documentos\NetBeansProjects\cinedb\src\main\java\dao\Pel
 C:\Users\famil\OneDrive\Documentos\NetBeansProjects\cinedb\src\main\java\dao\ProductoDAO.java
 C:\Users\famil\OneDrive\Documentos\NetBeansProjects\cinedb\src\main\java\dao\SalaDAO.java
 C:\Users\famil\OneDrive\Documentos\NetBeansProjects\cinedb\src\main\java\dao\TransaccionDAO.java
-C:\Users\famil\OneDrive\Documentos\NetBeansProjects\cinedb\src\main\java\entity\Asiento.java
 C:\Users\famil\OneDrive\Documentos\NetBeansProjects\cinedb\src\main\java\entity\Boleto.java
 C:\Users\famil\OneDrive\Documentos\NetBeansProjects\cinedb\src\main\java\entity\DetalleProducto.java
 C:\Users\famil\OneDrive\Documentos\NetBeansProjects\cinedb\src\main\java\entity\Funcion.java

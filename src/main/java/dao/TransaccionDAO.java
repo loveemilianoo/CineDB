@@ -9,6 +9,44 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TransaccionDAO {
+    public int crearTransaccion(Transaccion transaccion) {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        int idTransaccion = 0;
+        
+        try {
+            conn = new Conexion().getConexion();
+            
+            String query = "INSERT INTO tablas.transaccion (fecha_hora, total, metodo_pago) " +
+                          "VALUES (?, ?, ?, ?) RETURNING id_transaccion";
+            
+            ps = conn.prepareStatement(query);
+            ps.setTimestamp(1, Timestamp.valueOf(transaccion.getFechaHora()));
+            ps.setBigDecimal(2, transaccion.getTotal());
+            ps.setString(3, transaccion.getMetodoPago());
+            
+            rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                idTransaccion = rs.getInt("id_transaccion");
+            }
+            
+        } catch (SQLException e) {
+            System.out.println("Error al crear transacción: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (ps != null) ps.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        
+        return idTransaccion;
+    }
     
     public List<Transaccion> getTransacciones() {
         Conexion conn = new Conexion();
@@ -83,35 +121,7 @@ public class TransaccionDAO {
         }
         return transaccion;
     }
-    
-    public void insertarTransaccion(Transaccion transaccion) {
-        Conexion conn = new Conexion();
-        Connection conexion = null;
-        PreparedStatement ps = null;
-        
-        try {
-            conexion = conn.getConexion();
-            String query = "INSERT INTO tablas.transaccion (fecha_hora, total, metodo_pago) VALUES (?, ?, ?)";
-            ps = conexion.prepareStatement(query);
-            ps.setTimestamp(1, Timestamp.valueOf(transaccion.getFechaHora()));
-            ps.setBigDecimal(2, transaccion.getTotal());
-            ps.setString(3, transaccion.getMetodoPago());
-            
-            ps.executeUpdate();
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Error " + e.toString());
-        } finally {
-            try {
-                if (ps != null) ps.close();
-                if (conexion != null) conexion.close();
-            } catch (SQLException e) {
-                System.out.println("Error al cerrar recursos " + e.toString());
-            }
-        }
-    }
-    
+
     public void actualizarTransaccion(Transaccion transaccion) {
         Conexion conn = new Conexion();
         Connection conexion = null;

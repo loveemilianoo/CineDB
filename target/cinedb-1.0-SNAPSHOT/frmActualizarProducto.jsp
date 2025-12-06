@@ -3,37 +3,65 @@
 <%@page import="java.math.BigDecimal"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
-    // Procesar el formulario cuando se envía
+    String idParam = request.getParameter("id");
+    Producto producto = null;
+    ProductoDAO dao = new ProductoDAO();
+    
+    if(idParam != null && !idParam.trim().isEmpty()) {
+        try {
+            int idProducto = Integer.parseInt(idParam);
+            producto = dao.getProductoPorId(idProducto);
+        } catch (NumberFormatException e) {
+        }
+    }
+    
+    String mensaje = "";
+    String tipoMensaje = "";
+    
     if("POST".equals(request.getMethod())) {
         try {
             String nombre = request.getParameter("nombre");
             String precioStr = request.getParameter("precio");
             String disponible = request.getParameter("disponible");
+            String idStr = request.getParameter("idProducto");
             
             // Validar campos obligatorios
             if(nombre != null && !nombre.trim().isEmpty() &&
-               precioStr != null && !precioStr.trim().isEmpty()) {
+               precioStr != null && !precioStr.trim().isEmpty() &&
+               idStr != null && !idStr.trim().isEmpty()) {
                 
+                int idProducto = Integer.parseInt(idStr);
                 BigDecimal precio = new BigDecimal(precioStr);
                 int stock = "si".equals(disponible) ? 1 : 0;
                 
-                // ID temporal = 0, la BD generará el real
-                Producto producto = new Producto(0, nombre, precio, stock);
+                // Crear objeto Producto con los datos actualizados
+                Producto productoActualizado = new Producto(idProducto, nombre, precio, stock);
                 
-                // Insertar en la base de datos
-                ProductoDAO dao = new ProductoDAO();
-                dao.insertarProducto(producto);
+                // Actualizar en la base de datos
+                dao.actualizarProducto(productoActualizado);
                 
-                // Redirigir al listado
-                response.sendRedirect("frmListadoProducto.jsp");
-                return;
+                mensaje = "Producto actualizado exitosamente";
+                tipoMensaje = "success";
+                
+                // Recargar datos del producto
+                producto = dao.getProductoPorId(idProducto);
+            } else {
+                mensaje = "Todos los campos son requeridos";
+                tipoMensaje = "danger";
             }
         } catch (NumberFormatException e) {
-            // Manejar error de formato numérico
-            e.printStackTrace();
+            mensaje = "Error en el formato de los números";
+            tipoMensaje = "danger";
         } catch (Exception e) {
+            mensaje = "Error al actualizar el producto: " + e.getMessage();
+            tipoMensaje = "danger";
             e.printStackTrace();
         }
+    }
+    
+    if(producto == null && !"POST".equals(request.getMethod())) {
+        response.sendRedirect("frmListadoProducto.jsp");
+        return;
     }
 %>
 <!DOCTYPE html>
@@ -41,7 +69,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Nuevo Producto - Cine Prototype</title>
+    <title>Editar Producto - Cine Prototype</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -92,6 +120,12 @@
             border-radius: 10px;
             padding: 20px;
         }
+        .product-id {
+            background-color: #e9ecef;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
@@ -126,28 +160,59 @@
     </nav>
 
     <!-- Header -->
-<header class="hero-section">
-    <div class="container">
-        <div class="hero-content d-flex flex-column align-items-center justify-content-center text-center">
-            <h1 class="display-4 fw-bold mb-3">Nuevo Producto</h1>
-            <p class="lead mb-0">Agrega un producto al catálogo</p>
+    <header class="hero-section">
+        <div class="container">
+            <div class="hero-content d-flex flex-column align-items-center justify-content-center text-center">
+                <h1 class="display-4 fw-bold mb-3">Editar Producto</h1>
+                <p class="lead mb-0">Modifica la información del producto</p>
+            </div>
         </div>
-    </div>
-</header>
+    </header>
 
     <main class="container my-5">
+        <% if(!mensaje.isEmpty()) { %>
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-8">
+                <div class="alert alert-<%= tipoMensaje %> alert-dismissible fade show">
+                    <%= mensaje %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            </div>
+        </div>
+        <% } %>
+        
         <div class="row justify-content-center">
             <div class="col-md-8">
-                <!-- Formulario simplificado -->
+                <!-- Formulario de edición -->
                 <div class="card form-card">
-                    <div class="form-icon bg-success text-white">
-                        <i class="fa-solid fa-cart-plus"></i>
+                    <div class="form-icon bg-warning text-white">
+                        <i class="fa-solid fa-edit"></i>
                     </div>
                     <div class="card-body p-4">
-                        <h2 class="card-title text-center mb-4">Información Básica del Producto</h2>
+                        <h2 class="card-title text-center mb-4">Información del Producto</h2>
+                        
+                        <!-- Información del ID -->
+                        <% if(producto != null) { %>
+                        <div class="product-id">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="fa-solid fa-hashtag me-2"></i>
+                                    <strong>ID del Producto:</strong>
+                                    <span class="badge bg-secondary ms-2">#<%= producto.getIdProducto() %></span>
+                                </div>
+                                <div>
+                                    <i class="fa-solid fa-boxes-stacked me-1"></i>
+                                    <small>Stock actual: <%= producto.getStock() %></small>
+                                </div>
+                            </div>
+                        </div>
+                        <% } %>
                         
                         <div class="simple-form">
-                            <form method="POST" action="frmInsertaProducto.jsp">
+                            <form method="POST" action="frmActualizarProducto.jsp">
+                                <!-- Campo oculto para el ID -->
+                                <input type="hidden" name="idProducto" value="<%= producto != null ? producto.getIdProducto() : "" %>">
+                                
                                 <!-- Nombre del Producto -->
                                 <div class="mb-4">
                                     <label for="nombre" class="form-label required-field fw-bold">
@@ -158,6 +223,7 @@
                                            id="nombre" 
                                            name="nombre" 
                                            required
+                                           value="<%= producto != null ? producto.getNombre() : "" %>"
                                            placeholder="Ej: Palomitas, Refresco, Hot Dog">
                                 </div>
                                 
@@ -175,6 +241,7 @@
                                                required
                                                min="0" 
                                                step="0.01"
+                                               value="<%= producto != null ? String.format("%.2f", producto.getPrecioVenta()) : "0.00" %>"
                                                placeholder="0.00">
                                     </div>
                                 </div>
@@ -190,7 +257,7 @@
                                                name="disponible" 
                                                id="disponibleSi" 
                                                value="si" 
-                                               checked>
+                                               <%= producto != null && producto.getStock() > 0 ? "checked" : "" %>>
                                         <label class="form-check-label" for="disponibleSi">
                                             <span class="availability-badge available-badge"></span>
                                             Disponible
@@ -201,7 +268,8 @@
                                                type="radio" 
                                                name="disponible" 
                                                id="disponibleNo" 
-                                               value="no">
+                                               value="no"
+                                               <%= producto != null && producto.getStock() == 0 ? "checked" : "" %>>
                                         <label class="form-check-label" for="disponibleNo">
                                             <span class="availability-badge unavailable-badge"></span>
                                             No disponible
@@ -209,23 +277,57 @@
                                     </div>
                                     <div class="form-text mt-2">
                                         Indica si el producto está disponible para la venta.
+                                        <br>
                                     </div>
                                 </div>
                                 
+                                <!-- Información adicional -->
+                                <% if(producto != null) { %>
+                                <div class="alert alert-info">
+                                    <div class="d-flex">
+                                        <div class="me-3">
+                                            <i class="fa-solid fa-clock-rotate-left fa-2x"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="alert-heading">Información de registro</h6>
+                                            <p class="mb-0 small">
+                                                Este producto fue registrado con ID #<%= producto.getIdProducto() %>.
+                                                Última actualización: <%= new java.util.Date() %>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% } %>
+                                
                                 <!-- Botones de acción -->
                                 <div class="d-flex justify-content-between mt-4 pt-3 border-top">
-                                    <a href="frmListadoProducto.jsp" class="btn btn-outline-secondary">
-                                        <i class="fa-solid fa-arrow-left me-2"></i>Cancelar
-                                    </a>
                                     <div>
-                                        <button type="submit" class="btn btn-success">
-                                            <i class="fa-solid fa-floppy-disk me-2"></i>Guardar Producto
+                                        <a href="frmListadoProducto.jsp" class="btn btn-outline-secondary">
+                                            <i class="fa-solid fa-arrow-left me-2"></i>Volver al Listado
+                                        </a>
+                                    </div>
+                                    <div>
+                                        <a href="frmListadoProducto.jsp?eliminar=<%= producto != null ? producto.getIdProducto() : "" %>" 
+                                           class="btn btn-outline-danger me-2"
+                                           onclick="return confirm('¿Estás seguro de eliminar este producto?')">
+                                            <i class="fa-solid fa-trash me-2"></i>Eliminar
+                                        </a>
+                                        <button type="submit" class="btn btn-warning">
+                                            <i class="fa-solid fa-floppy-disk me-2"></i>Actualizar Producto
                                         </button>
                                     </div>
                                 </div>
                             </form>
                         </div>
                     </div>
+                </div>
+                
+                <!-- Enlace a crear nuevo producto -->
+                <div class="text-center mt-4">
+                    <a href="frmInsertaProducto.jsp" class="text-decoration-none">
+                        <i class="fa-solid fa-plus-circle me-1"></i>
+                        Crear nuevo producto
+                    </a>
                 </div>
             </div>
         </div>

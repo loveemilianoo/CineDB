@@ -6,46 +6,69 @@ import entity.*;
 import java.sql.*;
 
 public class BoletoDAO {
-     public List <Boleto> getBoletos() {
-         Conexion conn = new Conexion();
-         Connection conexion = null;
-         List <Boleto> boletos = new ArrayList();
-         PreparedStatement ps = null;
-         ResultSet rs = null;
-         
-         try{
-             conexion = conn.getConexion();
-             String query = "SELECT * FROM tablas.boleto ORDER BY id_boleto ASC";
-             ps= conexion.prepareStatement(query);
-             rs = ps.executeQuery();
-             
-             ResultSetMetaData rsmd = rs.getMetaData();
-             int columnas = rsmd.getColumnCount();
-             
-             while (rs.next()) {
-                Boleto boleto = new Boleto();
-                boleto.setIdBoleto(rs.getInt("id_boleto"));
-                boleto.setIdFuncion(rs.getInt("id_funcion"));
-                boleto.setIdAsiento(rs.getInt("id_asiento"));
-                boleto.setIdTransaccion(rs.getInt("id_transaccion"));
-                boleto.setPrecio(rs.getBigDecimal("precio"));
-                boleto.setTipoBoleto(rs.getString("tipo_boleto"));
-                boleto.setEstado(rs.getString("estado"));
-                
-                boletos.add(boleto);
+    
+    public List<String> getAsientosOcupados(int idFuncion) {
+        List<String> asientosOcupados = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        
+        try {
+            conn = new Conexion().getConexion();
+            String query = "SELECT asiento FROM tablas.boleto WHERE id_funcion = ? AND estado = 'activo'";
+            ps = conn.prepareStatement(query);
+            ps.setInt(1, idFuncion);
+            rs = ps.executeQuery();
+            
+            while (rs.next()) {
+                asientosOcupados.add(rs.getString("asiento"));
             }
-         } catch (Exception e){
-             e.printStackTrace();
-             System.out.println("Error "+e.toString());
-         } finally {
-             try {
-                 if (rs!= null) rs.close();
-                 if (ps!= null) ps.close();
-                 if (conexion != null) conexion.close();
-             } catch (SQLException e){
-                 System.out.println("Error al cerrar recursos "+e.toString());
-             }
-         } 
-         return boletos;
-     }
+        } catch (SQLException e) {
+            System.out.println("Error en getAsientosOcupados: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (ps != null) ps.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return asientosOcupados;
+    }
+    
+    public Boleto insertarBoleto (Boleto boleto){
+        Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+        Conexion conexion = new Conexion();
+        
+        try{
+            conn = conexion.getConexion();
+            String query = "INSERT INTO tablas.boleto (id_funcion, id_transaccion, precio, tipo_boleto, estado, asiento) "
+                    + "VALUES (?,?,?,?,?,?)";
+            ps = conn.prepareStatement(query);
+            ps.setInt(1, boleto.getIdFuncion());
+            ps.setInt(2, boleto.getIdTransaccion());
+            ps.setBigDecimal(3, boleto.getPrecio());
+            ps.setString(4, boleto.getTipoBoleto());
+            ps.setString(5, boleto.getEstado());
+            ps.setString(6, boleto.getAsiento());
+            
+            ps.executeUpdate();
+        }catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error " + e.toString());
+        } finally {
+            try {
+                if (rs != null)rs.close();
+                if (ps != null)ps.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                System.out.println("Error al cerrar recursos " + e.toString());
+            }
+        }
+        return boleto;
+    }
 }

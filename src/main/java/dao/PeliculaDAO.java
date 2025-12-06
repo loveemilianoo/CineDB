@@ -125,7 +125,48 @@ public class PeliculaDAO {
         }
     }
     
-    
+    public Pelicula getPeliculaPorId (int idPelicula){
+        Connection conn = null;
+        Conexion conexion = new Conexion();
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        Pelicula pelicula = null;
+
+        try{
+            conn = conexion.getConexion();
+            String query = "SELECT * FROM tablas.pelicula WHERE id_pelicula=?";
+            ps = conn.prepareStatement(query);
+            ps.setInt(1, idPelicula);
+            rs = ps.executeQuery();
+            
+            if (rs.next()){
+                pelicula = new Pelicula ();
+                pelicula.setIdPelicula(rs.getInt("id_pelicula"));
+                pelicula.setTitulo(rs.getString("titulo"));
+                String duracionStr = rs.getString("duracion");
+                
+                Duration duracion = parseDurationFromPostgres(duracionStr);
+                pelicula.setDuracion(duracion);
+                
+                pelicula.setGenero(rs.getString("genero"));
+                pelicula.setClasificacion(rs.getString("clasificacion"));
+            }
+            
+            
+        } catch (SQLException e){
+            System.out.println("Error "+e.toString());
+            e.printStackTrace();
+        } finally {
+            try{
+                if (ps != null) ps.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e){
+                System.out.println("Error en la base de datos "+e.toString());
+                e.printStackTrace();
+            }
+        }
+        return pelicula;
+    }
     
     
 }

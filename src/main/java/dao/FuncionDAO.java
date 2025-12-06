@@ -34,8 +34,9 @@ public class FuncionDAO {
                 funcion.setIdFuncion(rs.getInt("id_funcion"));
                 funcion.setIdPelicula(rs.getInt("id_pelicula"));
                 funcion.setIdSala(rs.getInt("id_sala"));
-                funcion.setHoraInicio(duracionPostgres(rs.getString("hora_inicio")));
+                funcion.setHoraInicio(rs.getTime("hora_inicio").toLocalTime());
                 funcion.setFecha(rs.getDate("fecha").toLocalDate());
+                
                 funciones.add(funcion);
             }
         } catch (Exception e) {
@@ -81,7 +82,7 @@ public class FuncionDAO {
                 funcion.setIdFuncion(rs.getInt("id_funcion"));
                 funcion.setIdPelicula(rs.getInt("id_pelicula"));
                 funcion.setIdSala(rs.getInt("id_sala"));
-                funcion.setHoraInicio(duracionPostgres(rs.getString("hora_inicio")));
+                funcion.setHoraInicio(rs.getTime("hora_inicio").toLocalTime());
                 funcion.setFecha(rs.getDate("fecha").toLocalDate());
                 funciones.add(funcion);
             }
@@ -116,20 +117,7 @@ public class FuncionDAO {
         }
     }
 
-    private String formatDurationPostgres(Duration duration) {
-        if (duration == null) {
-            return "00:00:00";
-        }
-        long seconds = duration.getSeconds();
-        long absSeconds = Math.abs(seconds);
-        return String.format(
-                "%02d:%02d:%02d",
-                absSeconds / 3600,
-                (absSeconds % 3600) / 60,
-                absSeconds % 60);
-    }
-
-    public void insertarFuncion(int idPelicula, int idSala, Funcion funcion) {
+    public void insertarFuncion(Funcion funcion) {
         Connection conn = null;
         Conexion conexion = new Conexion();
         PreparedStatement ps = null;
@@ -140,13 +128,11 @@ public class FuncionDAO {
 
             String query = "INSERT INTO tablas.funcion (id_pelicula, id_sala, fecha, hora_inicio) VALUES (?,?,?,?)";
             ps = conn.prepareStatement(query);
-            ps.setInt(1, idPelicula);
-            ps.setInt(2, idSala);
+            ps.setInt(1, funcion.getIdPelicula());
+            ps.setInt(2, funcion.getIdSala());
             ps.setDate(3, java.sql.Date.valueOf(funcion.getFecha()));
-
-            String horaInicio = formatDurationPostgres(funcion.getHoraInicio());
-
-            ps.setString(4, horaInicio);
+            ps.setTime(4, java.sql.Time.valueOf(funcion.getHoraInicio()));
+            
             ps.executeUpdate();
         } catch (Exception e) {
             System.out.println("Error " + e.toString());
@@ -164,5 +150,94 @@ public class FuncionDAO {
             }
         }
     }
-
+    
+    public Funcion getFuncionPorId (int idFuncion){
+        Connection conn = null;
+        Conexion conexion = new Conexion();
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        Funcion funcion = null;
+        
+        try {
+            conn = conexion.getConexion();
+            String query = "SELECT * FROM tablas.funcion WHERE id_funcion=?";
+            ps = conn.prepareStatement(query);
+            ps.setInt(1, idFuncion);
+            rs = ps.executeQuery();
+            
+            if (rs.next()){
+                funcion = new Funcion ();
+                funcion.setIdFuncion(rs.getInt("id_funcion"));
+                funcion.setIdPelicula(rs.getInt("id_pelicula"));
+                funcion.setIdSala(rs.getInt("id_sala")); 
+                
+                java.sql.Date sqlDate = rs.getDate("fecha");
+                funcion.setFecha(sqlDate != null ? sqlDate.toLocalDate() : null);
+                
+                java.sql.Time sqlTime = rs.getTime("hora_inicio");
+                funcion.setHoraInicio(sqlTime != null ? sqlTime.toLocalTime() : null);       
+            }
+        } catch (Exception e) {
+            System.out.println("Error " + e.toString());
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null)
+                    rs.close();
+                if (ps != null)
+                    ps.close();
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException e) {
+                System.out.println("Error al cerrar recursos " + e.toString());
+            }
+        }
+        return funcion;
+    }
+    
+    public List<Funcion> getFuncionesPorPelicula(int idPelicula) {
+        List<Funcion> funciones = new ArrayList<>();
+        Connection conn = null;
+        Conexion conexion = null;
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+        Funcion funcion = null;
+    
+        try {
+            conn = conexion.getConexion();
+            String query = "SELECT * FROM tablas.funcion WHERE id_pelicula = ? ORDER BY fecha, hora_inicio";
+            ps = conn.prepareStatement(query);
+            ps.setInt(1, idPelicula);
+            rs = ps.executeQuery();
+        
+        while (rs.next()) {
+            funcion = new Funcion();
+            funcion.setIdFuncion(rs.getInt("id_funcion"));
+            funcion.setIdPelicula(rs.getInt("id_pelicula"));
+            funcion.setIdSala(rs.getInt("id_sala"));
+            
+            java.sql.Date sqlDate = rs.getDate("fecha");
+            if (sqlDate != null) {
+                funcion.setFecha(sqlDate.toLocalDate());
+            }
+            java.sql.Time sqlTime = rs.getTime("hora_inicio");
+            if (sqlTime != null) {
+                funcion.setHoraInicio(sqlTime.toLocalTime());
+            }
+            funciones.add(funcion);
+            }
+        } catch (Exception e) {
+            System.out.println("Error " + e.toString());
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null)rs.close();
+                if (ps != null)ps.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                System.out.println("Error al cerrar recursos " + e.toString());
+            }
+        }
+    return funciones;
+    }
 }
