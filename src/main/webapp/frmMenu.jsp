@@ -147,6 +147,7 @@
                 <ul class="dropdown-menu w-100">
                   <li><a class="dropdown-item" href="frmListadoPeliculas.jsp"><i class="fa-solid fa-film me-2"></i>Gestionar Películas</a></li>
                   <li><a class="dropdown-item" href="frmListadoProducto.jsp"><i class="fa-solid fa-tags me-2"></i>Gestionar Productos</a></li>
+                  <li><a class="dropdown-item" href="frmListadoSalas.jsp"><i class="fa-solid fa-tags me-2"></i>Gestionar Salas</a></li>
                   <li><hr class="dropdown-divider"></li>
                   <li><a class="dropdown-item" href="#"><i class="fa-solid fa-chart-bar me-2"></i>Reportes</a></li>
                 </ul>

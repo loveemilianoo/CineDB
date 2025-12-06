@@ -6,39 +6,58 @@ import entity.*;
 import java.sql.*;
 
 public class BoletoDAO {
-    public List<Boleto> getBoletosPorUsuario(int idUsuario) {
-        List<Boleto> boletos = new ArrayList<>();
+    
+    public List<String> getAsientosOcupados(int idFuncion) {
+        List<String> asientosOcupados = new ArrayList<>();
         Connection conn = null;
-        ResultSet rs = null;
         PreparedStatement ps = null;
-        
+        ResultSet rs = null;
         
         try {
-            Conexion conexion = new Conexion();
-            conn = conexion.getConexion();
-            
-            String query = "SELECT * FROM tablas.boleto WHERE id_usuario = ? ORDER BY fecha_compra DESC";
-            
+            conn = new Conexion().getConexion();
+            String query = "SELECT asiento FROM tablas.boleto WHERE id_funcion = ? AND estado = 'activo'";
             ps = conn.prepareStatement(query);
-            ps.setInt(1, idUsuario);
+            ps.setInt(1, idFuncion);
             rs = ps.executeQuery();
             
             while (rs.next()) {
-                Boleto boleto = new Boleto();
-                boleto.setIdBoleto(rs.getInt("id_boleto"));
-                boleto.setIdFuncion(rs.getInt("id_funcion"));
-                boleto.setIdUsuario(rs.getInt("id_usuario"));
-                boleto.setAsiento(rs.getString("asiento"));
-                boleto.setPrecio(rs.getBigDecimal("precio"));
-                
-                Timestamp timestamp = rs.getTimestamp("fecha_compra");
-                if (timestamp != null) {
-                    boleto.setFechaCompra(timestamp.toLocalDateTime());
-                }
-                boleto.setEstado(rs.getString("estado"));
-                boletos.add(boleto);
+                asientosOcupados.add(rs.getString("asiento"));
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
+            System.out.println("Error en getAsientosOcupados: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (ps != null) ps.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return asientosOcupados;
+    }
+    
+    public Boleto insertarBoleto (Boleto boleto){
+        Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+        Conexion conexion = new Conexion();
+        
+        try{
+            conn = conexion.getConexion();
+            String query = "INSERT INTO tablas.boleto (id_funcion, id_transaccion, precio, tipo_boleto, estado, asiento) "
+                    + "VALUES (?,?,?,?,?,?)";
+            ps = conn.prepareStatement(query);
+            ps.setInt(1, boleto.getIdFuncion());
+            ps.setInt(2, boleto.getIdTransaccion());
+            ps.setBigDecimal(3, boleto.getPrecio());
+            ps.setString(4, boleto.getTipoBoleto());
+            ps.setString(5, boleto.getEstado());
+            ps.setString(6, boleto.getAsiento());
+            
+            ps.executeUpdate();
+        }catch (Exception e) {
             e.printStackTrace();
             System.out.println("Error " + e.toString());
         } finally {
@@ -50,6 +69,6 @@ public class BoletoDAO {
                 System.out.println("Error al cerrar recursos " + e.toString());
             }
         }
-        return boletos;
+        return boleto;
     }
 }

@@ -1,0 +1,499 @@
+<%@page import="dao.BoletoDAO"%>
+<%@page import="dao.TransaccionDAO"%>
+<%@page import="dao.FuncionDAO"%>
+<%@page import="dao.SalaDAO"%>
+<%@page import="dao.PeliculaDAO"%>
+<%@page import="entity.*"%>
+<%@page import="java.math.BigDecimal"%>
+<%@page import="java.util.List"%>
+<%@page import="java.util.ArrayList"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprar Boletos - Cine</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 0;
+        }
+        .ticket-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            background: white;
+            overflow: hidden;
+        }
+        .ticket-header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .ticket-body {
+            padding: 25px;
+        }
+        .price-tag {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #28a745;
+        }
+        .btn-comprar {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            border: none;
+            color: white;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-weight: bold;
+        }
+        .movie-info {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .summary-box {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .alert {
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .quantity-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .quantity-btn {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #dee2e6;
+            border-radius: 50%;
+            background: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .quantity-btn.selected {
+            border-color: #28a745;
+            background: #28a745;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <%
+    // Obtener parámetros de la función
+    String idFuncionStr = request.getParameter("idFuncion");
+    String idPeliculaStr = request.getParameter("idPelicula");
+    String tituloPelicula = request.getParameter("tituloPelicula");
+    String fechaFuncion = request.getParameter("fechaFuncion");
+    String horaFuncion = request.getParameter("horaFuncion");
+    String idSalaStr = request.getParameter("idSala");
+    
+    if (idFuncionStr == null || idPeliculaStr == null) {
+        response.sendRedirect("frmSeleccionarPelicula.jsp");
+        return;
+    }
+    
+    int idFuncion = Integer.parseInt(idFuncionStr);
+    int idPelicula = Integer.parseInt(idPeliculaStr);
+    int idSala = Integer.parseInt(idSalaStr);
+    
+    // Obtener información
+    PeliculaDAO peliculaDAO = new PeliculaDAO();
+    SalaDAO salaDAO = new SalaDAO();
+    FuncionDAO funcionDAO = new FuncionDAO();
+    BoletoDAO boletoDAO = new BoletoDAO();
+    
+    Pelicula pelicula = peliculaDAO.getPeliculaPorId(idPelicula);
+    Sala sala = salaDAO.getSalaPorId(idSala);
+    Funcion funcion = funcionDAO.getFuncionPorId(idFuncion);
+    
+    // Obtener asientos ocupados
+    List<String> asientosOcupados = boletoDAO.getAsientosOcupados(idFuncion);
+    
+    // Configuración
+    int capacidadTotal = sala.getCapacidad();
+    int asientosDisponibles = capacidadTotal - asientosOcupados.size();
+    
+    // Precio fijo por boleto
+    BigDecimal precioPorBoleto = new BigDecimal("8.50");
+    
+    // Procesar compra inmediata
+    String cantidadSeleccionada = "1"; // Valor por defecto
+    
+    if ("POST".equalsIgnoreCase(request.getMethod())) {
+        cantidadSeleccionada = request.getParameter("cantidad");
+        
+        if (cantidadSeleccionada != null && !cantidadSeleccionada.trim().isEmpty()) {
+            int cantidad = Integer.parseInt(cantidadSeleccionada);
+            
+            // Verificar disponibilidad
+            if (cantidad > 0 && cantidad <= asientosDisponibles) {
+                // Generar asientos automáticamente
+                List<String> asientosAsignados = generarAsientosAutomaticos(idFuncion, cantidad, sala.getNumeroSala(), boletoDAO);
+                
+                if (!asientosAsignados.isEmpty()) {
+                    try {
+                        // 1. Crear transacción primero
+                        TransaccionDAO transaccionDAO = new TransaccionDAO();
+                        BigDecimal total = precioPorBoleto.multiply(new BigDecimal(cantidad));
+                        Transaccion transaccion = new Transaccion(total, "efectivo");
+                        
+                        int idTransaccion = transaccionDAO.crearTransaccion(transaccion);
+                        
+                        if (idTransaccion > 0) {
+                            // 2. Crear y guardar boletos
+                            boolean todosGuardados = true;
+                            
+                            for (String asiento : asientosAsignados) {
+                                Boleto boleto = new Boleto();
+                                boleto.setIdFuncion(idFuncion);
+                                boleto.setIdTransaccion(idTransaccion);
+                                boleto.setPrecio(precioPorBoleto);
+                                boleto.setTipoBoleto("general");
+                                boleto.setEstado("activo");
+                                boleto.setAsiento(asiento);
+                                
+                                Boleto resultado = boletoDAO.insertarBoleto(boleto);
+                                if (resultado == null) {
+                                    todosGuardados = false;
+                                    break;
+                                }
+                            }
+                            
+                            if (todosGuardados) {
+                                // Guardar datos para transacción
+                                session.setAttribute("compraExitosa", true);
+                                session.setAttribute("asientosAsignados", asientosAsignados);
+                                session.setAttribute("cantidadComprada", cantidad);
+                                session.setAttribute("totalCompra", total);
+                                session.setAttribute("idTransaccion", idTransaccion);
+                                session.setAttribute("idFuncion", idFuncion);
+                                session.setAttribute("idPelicula", idPelicula);
+                                session.setAttribute("tituloPelicula", tituloPelicula);
+                                session.setAttribute("fechaFuncion", fechaFuncion);
+                                session.setAttribute("horaFuncion", horaFuncion);
+                                session.setAttribute("numeroSala", sala.getNumeroSala());
+                                session.setAttribute("precioPorBoleto", precioPorBoleto);
+                                
+                                // Redirigir directamente a transacción
+                                response.sendRedirect("frmTransaccion.jsp");
+                                return;
+                            } else {
+                                out.println("<div class='alert alert-danger alert-dismissible fade show' role='alert'>");
+                                out.println("<i class='fa-solid fa-triangle-exclamation me-2'></i>");
+                                out.println("<strong>Error:</strong> No se pudieron crear todos los boletos.");
+                                out.println("<button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>");
+                                out.println("</div>");
+                            }
+                        } else {
+                            out.println("<div class='alert alert-danger alert-dismissible fade show' role='alert'>");
+                            out.println("<i class='fa-solid fa-triangle-exclamation me-2'></i>");
+                            out.println("<strong>Error:</strong> No se pudo crear la transacción.");
+                            out.println("<button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>");
+                            out.println("</div>");
+                        }
+                    } catch (Exception e) {
+                        out.println("<div class='alert alert-danger alert-dismissible fade show' role='alert'>");
+                        out.println("<i class='fa-solid fa-triangle-exclamation me-2'></i>");
+                        out.println("<strong>Error:</strong> " + e.getMessage());
+                        out.println("<button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>");
+                        out.println("</div>");
+                        e.printStackTrace();
+                    }
+                } else {
+                    out.println("<div class='alert alert-danger alert-dismissible fade show' role='alert'>");
+                    out.println("<i class='fa-solid fa-triangle-exclamation me-2'></i>");
+                    out.println("<strong>Error:</strong> No se pudieron asignar asientos. Intenta con menos boletos.");
+                    out.println("<button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>");
+                    out.println("</div>");
+                }
+            } else {
+                out.println("<div class='alert alert-danger alert-dismissible fade show' role='alert'>");
+                out.println("<i class='fa-solid fa-triangle-exclamation me-2'></i>");
+                out.println("<strong>Error:</strong> Cantidad no válida o no hay suficientes asientos disponibles.");
+                out.println("<button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>");
+                out.println("</div>");
+            }
+        }
+    }
+    
+    // Calcular total basado en cantidad seleccionada
+    int cantidad = 1;
+    if (cantidadSeleccionada != null && !cantidadSeleccionada.trim().isEmpty()) {
+        cantidad = Integer.parseInt(cantidadSeleccionada);
+    }
+    BigDecimal totalCompra = precioPorBoleto.multiply(new BigDecimal(cantidad));
+    %>
+    
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="frmMenu.jsp">
+                <i class="fa-solid fa-film me-2"></i>Cine
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero-section text-center">
+        <div class="container">
+            <h1 class="display-4 fw-bold mb-3">🎫 Comprar Boletos</h1>
+            <p class="lead mb-0">Compra rápida y sencilla - Asignación automática de asientos</p>
+        </div>
+    </header>
+
+    <main class="container my-5">
+        <!-- Información de la función -->
+        <div class="movie-info">
+            <div class="row">
+                <div class="col-md-8">
+                    <h4><i class="fa-solid fa-film me-2"></i><%= pelicula.getTitulo() %></h4>
+                    <div class="row mt-3">
+                        <div class="col-md-4">
+                            <p><i class="fa-solid fa-calendar me-2 text-primary"></i><strong>Fecha:</strong> <%= fechaFuncion %></p>
+                        </div>
+                        <div class="col-md-4">
+                            <p><i class="fa-solid fa-clock me-2 text-warning"></i><strong>Hora:</strong> <%= horaFuncion %></p>
+                        </div>
+                        <div class="col-md-4">
+                            <p><i class="fa-solid fa-door-closed me-2 text-success"></i><strong>Sala:</strong> <%= sala.getNumeroSala() %></p>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <span class="badge bg-info"><i class="fa-solid fa-users me-1"></i>Capacidad: <%= capacidadTotal %></span>
+                        <span class="badge bg-success ms-2"><i class="fa-solid fa-chair me-1"></i>Disponibles: <%= asientosDisponibles %></span>
+                    </div>
+                </div>
+                <div class="col-md-4 text-end">
+                    <a href="frmSeleccionarFuncion.jsp?idPelicula=<%= idPelicula %>&tituloPelicula=<%= java.net.URLEncoder.encode(tituloPelicula, "UTF-8") %>" 
+                       class="btn btn-outline-secondary">
+                        <i class="fa-solid fa-arrow-left me-2"></i>Cambiar Función
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="ticket-card">
+                    <div class="ticket-header">
+                        <h4 class="mb-0"><i class="fa-solid fa-shopping-cart me-2"></i>Comprar Boletos</h4>
+                    </div>
+                    <div class="ticket-body">
+                        <!-- Formulario sin JavaScript -->
+                        <form method="post" action="frmComprarBoletos.jsp">
+                            <input type="hidden" name="idFuncion" value="<%= idFuncion %>">
+                            <input type="hidden" name="idPelicula" value="<%= idPelicula %>">
+                            <input type="hidden" name="tituloPelicula" value="<%= tituloPelicula %>">
+                            <input type="hidden" name="fechaFuncion" value="<%= fechaFuncion %>">
+                            <input type="hidden" name="horaFuncion" value="<%= horaFuncion %>">
+                            <input type="hidden" name="idSala" value="<%= idSala %>">
+                            
+                            <!-- Selector de cantidad -->
+                            <div class="text-center mb-5">
+                                <h5 class="mb-4">Selecciona la cantidad de boletos:</h5>
+                                
+                                <div class="quantity-options">
+                                    <% 
+                                    int maxMostrar = Math.min(10, asientosDisponibles);
+                                    for (int i = 1; i <= maxMostrar; i++) { 
+                                        boolean seleccionado = (i == cantidad);
+                                    %>
+                                    <div>
+                                        <% if (seleccionado) { %>
+                                        <span class="quantity-btn selected"><%= i %></span>
+                                        <input type="hidden" name="cantidad" value="<%= i %>">
+                                        <% } else { %>
+                                        <button type="submit" name="cantidad" value="<%= i %>" 
+                                                class="quantity-btn">
+                                            <%= i %>
+                                        </button>
+                                        <% } %>
+                                    </div>
+                                    <% } %>
+                                    
+                                    <% if (asientosDisponibles > 10) { %>
+                                    <div>
+                                        <% if (cantidad > 10) { %>
+                                        <span class="quantity-btn selected"><%= cantidad %></span>
+                                        <input type="hidden" name="cantidad" value="<%= cantidad %>">
+                                        <% } else { %>
+                                        <!-- Botón para abrir input personalizado -->
+                                        <button type="button" class="quantity-btn" 
+                                                onclick="document.getElementById('customQuantity').style.display='block'">
+                                            <i class="fa-solid fa-ellipsis-h"></i>
+                                        </button>
+                                        <% } %>
+                                    </div>
+                                    <% } %>
+                                </div>
+                                
+                                <!-- Input personalizado para cantidades mayores a 10 -->
+                                <% if (cantidad > 10 || request.getParameter("showCustom") != null) { %>
+                                <div id="customQuantity" class="mt-3">
+                                    <label for="cantidadCustom" class="form-label">Especificar cantidad (máx <%= asientosDisponibles %>):</label>
+                                    <div class="input-group" style="max-width: 200px; margin: 0 auto;">
+                                        <input type="number" class="form-control" id="cantidadCustom" 
+                                               name="cantidad" value="<%= cantidad %>" min="1" max="<%= asientosDisponibles %>">
+                                        <button type="submit" class="btn btn-outline-primary">
+                                            <i class="fa-solid fa-check"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <% } %>
+                                
+                                <small class="text-muted mt-2 d-block">
+                                    Máximo <%= asientosDisponibles %> boletos disponibles
+                                </small>
+                            </div>
+                            
+                            <!-- Resumen de compra -->
+                            <div class="summary-box">
+                                <h5 class="mb-3"><i class="fa-solid fa-receipt me-2"></i>Resumen de Compra</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Precio unitario:</strong></p>
+                                        <h4 class="price-tag">$<%= precioPorBoleto %></h4>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Total:</strong></p>
+                                        <h3 class="text-success">$<%= totalCompra %></h3>
+                                        <p><small><%= cantidad %> boleto(s) x $<%= precioPorBoleto %></small></p>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <p class="mb-0 text-muted">
+                                        <i class="fa-solid fa-info-circle me-1"></i>
+                                        Los asientos serán asignados automáticamente por el sistema.
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- Botón de compra inmediata -->
+                            <div class="text-center mt-5">
+                                <button type="submit" class="btn btn-comprar btn-lg">
+                                    <i class="fa-solid fa-credit-card me-2"></i>Comprar Ahora
+                                </button>
+                                <p class="text-muted mt-2 small">
+                                    Al hacer clic en "Comprar Ahora", se procesará tu compra inmediatamente.
+                                </p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Información adicional -->
+                <div class="card border-0 shadow-sm mt-4">
+                    <div class="card-body">
+                        <h5><i class="fa-solid fa-lightbulb me-2 text-warning"></i>Información importante</h5>
+                        <ul class="mt-3 mb-0">
+                            <li class="mb-2">Los boletos no son reembolsables</li>
+                            <li class="mb-2">Presenta tu código de confirmación en taquilla</li>
+                            <li class="mb-2">Llega 15 minutos antes de la función</li>
+                            <li>Los asientos se asignan para optimizar la experiencia de todos</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <p class="mb-0">
+                <i class="fa-solid fa-film me-2"></i>Sistema de Cine &copy; 2024
+            </p>
+        </div>
+    </footer>
+
+    <!-- Script simple solo para mostrar/ocultar input personalizado -->
+    <script>
+        function mostrarInputPersonalizado() {
+            document.getElementById('customQuantity').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
+
+<%!
+// Método para generar asientos automáticamente
+public List<String> generarAsientosAutomaticos(int idFuncion, int cantidad, int numeroSala, BoletoDAO boletoDAO) {
+    List<String> asientosAsignados = new ArrayList<>();
+    List<String> asientosOcupados = boletoDAO.getAsientosOcupados(idFuncion);
+    
+    // Configurar el diseño de la sala
+    int filas = 8; // A-H
+    int asientosPorFila = 12;
+    char[] letrasFila = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'};
+    
+    // Estrategia: asignar desde el centro hacia afuera
+    int filaInicio = 3; // Empezar desde fila D (centro)
+    int asientoInicio = 5; // Empezar desde asiento 6 (centro)
+    
+    // Primero intentar asignar asientos juntos en el centro
+    for (int offsetFila = 0; offsetFila < filas && asientosAsignados.size() < cantidad; offsetFila++) {
+        int filaActual = (filaInicio + offsetFila) % filas;
+        
+        for (int offsetAsiento = 0; offsetAsiento < asientosPorFila && asientosAsignados.size() < cantidad; offsetAsiento++) {
+            int asientoActual = (asientoInicio + offsetAsiento) % asientosPorFila;
+            
+            String asiento = letrasFila[filaActual] + String.format("%02d", asientoActual + 1);
+            
+            if (!asientosOcupados.contains(asiento) && !asientosAsignados.contains(asiento)) {
+                asientosAsignados.add(asiento);
+                
+                // Si ya asignamos todos, salir
+                if (asientosAsignados.size() >= cantidad) {
+                    return asientosAsignados;
+                }
+            }
+        }
+        
+        // Intentar también en dirección contraria
+        for (int offsetAsiento = 0; offsetAsiento < asientosPorFila && asientosAsignados.size() < cantidad; offsetAsiento++) {
+            int asientoActual = (asientoInicio - offsetAsiento + asientosPorFila) % asientosPorFila;
+            
+            String asiento = letrasFila[filaActual] + String.format("%02d", asientoActual + 1);
+            
+            if (!asientosOcupados.contains(asiento) && !asientosAsignados.contains(asiento)) {
+                asientosAsignados.add(asiento);
+                
+                if (asientosAsignados.size() >= cantidad) {
+                    return asientosAsignados;
+                }
+            }
+        }
+    }
+    
+    // Si no encontramos suficientes asientos en el centro, buscar en cualquier parte
+    if (asientosAsignados.size() < cantidad) {
+        for (int fila = 0; fila < filas && asientosAsignados.size() < cantidad; fila++) {
+            for (int asientoNum = 1; asientoNum <= asientosPorFila && asientosAsignados.size() < cantidad; asientoNum++) {
+                String asiento = letrasFila[fila] + String.format("%02d", asientoNum);
+                
+                if (!asientosOcupados.contains(asiento) && !asientosAsignados.contains(asiento)) {
+                    asientosAsignados.add(asiento);
+                }
+            }
+        }
+    }
+    
+    return asientosAsignados;
+}
+%>

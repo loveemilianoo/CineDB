@@ -17,7 +17,7 @@
             daoEliminar.eliminarProducto(idEliminar);
             
             // Redirigir para evitar reenvío del formulario (F5)
-            response.sendRedirect("frmListadoProductoSinStock.jsp");
+            response.sendRedirect("frmListadoProducto.jsp");
             return;
         } catch (NumberFormatException e) {
             e.printStackTrace();
@@ -157,7 +157,7 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="frmListadoPeliculas.jsp"><i class="fa-solid fa-film me-2"></i>Películas</a></li>
-                            <li><a class="dropdown-item active" href="frmListadoProductoSinStock.jsp"><i class="fa-solid fa-tags me-2"></i>Productos</a></li>
+                            <li><a class="dropdown-item active" href="frmListadoProducto.jsp"><i class="fa-solid fa-tags me-2"></i>Productos</a></li>
                             <li><a class="dropdown-item" href="#"><i class="fa-solid fa-calendar me-2"></i>Funciones</a></li>
                             <li><a class="dropdown-item" href="frmListadoBoletos.jsp"><i class="fa-solid fa-ticket me-2"></i>Boletos</a></li>
                         </ul>
@@ -187,9 +187,9 @@
     <main class="container my-5">
         <!-- Barra de búsqueda -->
         <div class="row mb-4">
-            <div class="col-md-8">
+            <div class="row mb-4 justify-content-center">
                 <!-- Formulario de búsqueda -->
-                <form method="GET" action="frmListadoProductoSinStock.jsp" class="search-box">
+                <form method="GET" action="frmListadoProducto.jsp" class="search-box">
                     <div class="input-group">
                         <input type="text" class="form-control" 
                                name="buscar" 
@@ -199,7 +199,7 @@
                             <i class="fa-solid fa-search"></i>
                         </button>
                         <% if(buscar != null && !buscar.trim().isEmpty()) { %>
-                        <a href="frmListadoProductoSinStock.jsp" class="btn btn-outline-secondary" title="Limpiar búsqueda">
+                        <a href="frmListadoProducto.jsp" class="btn btn-outline-secondary" title="Limpiar búsqueda">
                             <i class="fa-solid fa-times"></i>
                         </a>
                         <% } %>
@@ -214,19 +214,11 @@
                 </div>
                 <% } %>
             </div>
-            <div class="col-md-4 text-end">
-                <div class="btn-group">
-                    <a href="frmListadoProductoSinStock.jsp" 
-                       class="btn <%= buscar == null ? "btn-primary" : "btn-outline-primary" %>">
-                       Todos los Productos
-                    </a>
-                </div>
-            </div>
         </div>
 
         <!-- Estadísticas simplificadas -->
-        <div class="row mb-4">
-            <div class="col-md-6">
+        <div class="row mb-4 justify-content-center">
+            <div class="col-md-6 justify-content-center">
                 <div class="card stats-card border-start border-primary border-4">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
@@ -237,28 +229,6 @@
                             </div>
                             <div class="icon-circle bg-primary text-white">
                                 <i class="fa-solid fa-boxes"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card stats-card border-start border-info border-4">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="text-muted mb-0">Acciones Disponibles</h6>
-                                <div class="mt-2">
-                                    <a href="frmInsertaProducto.jsp" class="btn btn-sm btn-success me-2">
-                                        <i class="fa-solid fa-plus me-1"></i>Agregar
-                                    </a>
-                                    <a href="frmListadoProducto.jsp" class="btn btn-sm btn-outline-secondary">
-                                        <i class="fa-solid fa-boxes-stacked me-1"></i>Ver con Stock
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="icon-circle bg-info text-white">
-                                <i class="fa-solid fa-gear"></i>
                             </div>
                         </div>
                     </div>
@@ -299,7 +269,7 @@
                                         <i class="fa-solid fa-plus me-2"></i>Agregar Producto
                                     </a>
                                     <% if(buscar != null && !buscar.trim().isEmpty()) { %>
-                                    <a href="frmListadoProductoSinStock.jsp" class="btn btn-outline-secondary ms-2">
+                                    <a href="frmListadoProducto.jsp" class="btn btn-outline-secondary ms-2">
                                         <i class="fa-solid fa-list me-2"></i>Ver todos los productos
                                     </a>
                                     <% } %>
@@ -316,9 +286,6 @@
                             <td><span class="badge bg-secondary">#<%= producto.getIdProducto() %></span></td>
                             <td>
                                 <strong><%= producto.getNombre() %></strong>
-                                <% if(producto.getStock() > 0 && producto.getStock() <= 5) { %>
-                                <span class="badge bg-warning ms-2">Pocas unidades</span>
-                                <% } %>
                             </td>
                             <td>
                                 <span class="fw-bold text-primary">$<%= String.format("%.2f", producto.getPrecioVenta()) %></span>
@@ -349,7 +316,7 @@
                                        title="Editar producto">
                                         <i class="fa-solid fa-edit"></i> Editar
                                     </a>
-                                    <a href="frmListadoProductoSinStock.jsp?eliminar=<%= producto.getIdProducto() %>" 
+                                    <a href="frmListadoProducto.jsp?eliminar=<%= producto.getIdProducto() %>" 
                                        class="btn btn-outline-danger btn-action" 
                                        title="Eliminar producto"
                                        onclick="return confirm('¿Estás seguro de eliminar: <%= producto.getNombre() %>?')">
@@ -377,8 +344,8 @@
                                 <i class="fa-solid fa-circle-info me-2"></i>Información del Catálogo
                             </h6>
                             <p class="mb-0">
-                                <i class="fa-solid fa-circle status-available me-1"></i>Disponible | 
-                                <i class="fa-solid fa-circle status-unavailable ms-3 me-1"></i>No disponible
+                                <span class="product-status status-available me-1"></span>Disponible | 
+                                <span class="product-status status-unavailable ms-3 me-1"></span>No disponible
                             </p>
                         </div>
                         <div>

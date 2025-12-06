@@ -84,32 +84,43 @@ public class TransaccionDAO {
         return transaccion;
     }
     
-    public void insertarTransaccion(Transaccion transaccion) {
-        Conexion conn = new Conexion();
-        Connection conexion = null;
+    public int crearTransaccion(Transaccion transaccion) {
+        Connection conn = null;
         PreparedStatement ps = null;
+        ResultSet rs = null;
+        int idTransaccion = 0;
         
         try {
-            conexion = conn.getConexion();
-            String query = "INSERT INTO tablas.transaccion (fecha_hora, total, metodo_pago) VALUES (?, ?, ?)";
-            ps = conexion.prepareStatement(query);
+            conn = new Conexion().getConexion();
+            
+            String query = "INSERT INTO tablas.transaccion (fecha_hora, total, metodo_pago) " +
+                          "VALUES (?, ?, ?, ?) RETURNING id_transaccion";
+            
+            ps = conn.prepareStatement(query);
             ps.setTimestamp(1, Timestamp.valueOf(transaccion.getFechaHora()));
             ps.setBigDecimal(2, transaccion.getTotal());
             ps.setString(3, transaccion.getMetodoPago());
             
-            ps.executeUpdate();
+            rs = ps.executeQuery();
             
-        } catch (Exception e) {
+            if (rs.next()) {
+                idTransaccion = rs.getInt("id_transaccion");
+            }
+            
+        } catch (SQLException e) {
+            System.out.println("Error al crear transacción: " + e.getMessage());
             e.printStackTrace();
-            System.out.println("Error " + e.toString());
         } finally {
             try {
+                if (rs != null) rs.close();
                 if (ps != null) ps.close();
-                if (conexion != null) conexion.close();
+                if (conn != null) conn.close();
             } catch (SQLException e) {
-                System.out.println("Error al cerrar recursos " + e.toString());
+                e.printStackTrace();
             }
         }
+        
+        return idTransaccion;
     }
     
     public void actualizarTransaccion(Transaccion transaccion) {

@@ -17,7 +17,6 @@
                 BigDecimal precio = new BigDecimal(precioStr);
                 int stock = "si".equals(disponible) ? 1 : 0;
                 
-                // CORRECCIÓN: Usar constructor con parámetros
                 // ID temporal = 0, la BD generará el real
                 Producto producto = new Producto(0, nombre, precio, stock);
                 
@@ -25,8 +24,8 @@
                 ProductoDAO dao = new ProductoDAO();
                 dao.insertarProducto(producto);
                 
-                // Redirigir al listado sin stock
-                response.sendRedirect("frmListadoProductoSinStock.jsp");
+                // Redirigir al listado
+                response.sendRedirect("frmListadoProducto.jsp");
                 return;
             }
         } catch (NumberFormatException e) {
@@ -116,7 +115,7 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="frmListadoPeliculas.jsp"><i class="fa-solid fa-film me-2"></i>Películas</a></li>
-                            <li><a class="dropdown-item" href="frmListadoProductoSinStock.jsp"><i class="fa-solid fa-tags me-2"></i>Productos</a></li>
+                            <li><a class="dropdown-item" href="frmListadoProducto.jsp"><i class="fa-solid fa-tags me-2"></i>Productos</a></li>
                             <li><a class="dropdown-item" href="#"><i class="fa-solid fa-calendar me-2"></i>Funciones</a></li>
                             <li><a class="dropdown-item" href="frmListadoBoletos.jsp"><i class="fa-solid fa-ticket me-2"></i>Boletos</a></li>
                         </ul>
@@ -127,14 +126,14 @@
     </nav>
 
     <!-- Header -->
-    <header class="hero-section">
-        <div class="container">
-            <div class="hero-content">
-                <h1 class="display-4 fw-bold mb-3">Nuevo Producto</h1>
-                <p class="lead mb-0">Agrega un producto al catálogo (versión simplificada)</p>
-            </div>
+<header class="hero-section">
+    <div class="container">
+        <div class="hero-content d-flex flex-column align-items-center justify-content-center text-center">
+            <h1 class="display-4 fw-bold mb-3">Nuevo Producto</h1>
+            <p class="lead mb-0">Agrega un producto al catálogo</p>
         </div>
-    </header>
+    </div>
+</header>
 
     <main class="container my-5">
         <div class="row justify-content-center">
@@ -148,7 +147,7 @@
                         <h2 class="card-title text-center mb-4">Información Básica del Producto</h2>
                         
                         <div class="simple-form">
-                            <form method="POST" action="frmGuardaProductoSinStock.jsp">
+                            <form method="POST" action="frmInsertaProducto.jsp">
                                 <!-- Nombre del Producto -->
                                 <div class="mb-4">
                                     <label for="nombre" class="form-label required-field fw-bold">
@@ -215,47 +214,16 @@
                                 
                                 <!-- Botones de acción -->
                                 <div class="d-flex justify-content-between mt-4 pt-3 border-top">
-                                    <a href="frmListadoProductoSinStock.jsp" class="btn btn-outline-secondary">
+                                    <a href="frmListadoProducto.jsp" class="btn btn-outline-secondary">
                                         <i class="fa-solid fa-arrow-left me-2"></i>Cancelar
                                     </a>
                                     <div>
-                                        <a href="frmGuardaProducto.jsp" class="btn btn-outline-primary me-2">
-                                            <i class="fa-solid fa-boxes-stacked me-2"></i>Versión con Stock
-                                        </a>
                                         <button type="submit" class="btn btn-success">
                                             <i class="fa-solid fa-floppy-disk me-2"></i>Guardar Producto
                                         </button>
                                     </div>
                                 </div>
                             </form>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Comparación de versiones -->
-                <div class="row mt-4">
-                    <div class="col-md-6">
-                        <div class="card border-primary h-100">
-                            <div class="card-body">
-                                <h5 class="card-title">
-                                    <i class="fa-solid fa-boxes-stacked text-primary me-2"></i>Versión Completa
-                                </h5>
-                                <p class="card-text">Incluye control de inventario, stock y alertas.</p>
-                                <a href="frmGuardaProducto.jsp" class="btn btn-outline-primary btn-sm">
-                                    Usar versión con stock
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card border-success h-100">
-                            <div class="card-body">
-                                <h5 class="card-title">
-                                    <i class="fa-solid fa-check-circle text-success me-2"></i>Versión Simplificada
-                                </h5>
-                                <p class="card-text">Solo nombre, precio y disponibilidad. Menos mantenimiento.</p>
-                                <span class="badge bg-success">Actual</span>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -276,7 +244,7 @@
                         <a href="frmSeleccionarPelicula.jsp" class="btn btn-outline-light btn-sm">
                             <i class="fa-solid fa-ticket me-1"></i>Boletos
                         </a>
-                        <a href="frmListadoProductoSinStock.jsp" class="btn btn-outline-light btn-sm">
+                        <a href="frmListadoProducto.jsp" class="btn btn-outline-light btn-sm">
                             <i class="fa-solid fa-popcorn me-1"></i>Productos
                         </a>
                         <a href="frmMenu.jsp" class="btn btn-outline-light btn-sm">

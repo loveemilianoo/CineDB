@@ -1,26 +1,26 @@
 package entity;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 public class Boleto {
     private int idBoleto;
     private int idFuncion;
-    private int idUsuario;
-    private String asiento;  
+    private int idTransaccion;  
     private BigDecimal precio;
-    private LocalDateTime fechaCompra;
+    private String tipoBoleto;
     private String estado;
+    private String asiento;
     
     public Boleto() {}
-    
-    public Boleto(int idFuncion, int idUsuario, String asiento, BigDecimal precio) {
+
+    public Boleto(int idBoleto, int idFuncion, int idTransaccion, BigDecimal precio, String tipoBoleto, String estado, String asiento) {
+        this.idBoleto = idBoleto;
         this.idFuncion = idFuncion;
-        this.idUsuario = idUsuario;
-        this.asiento = asiento;
+        this.idTransaccion = idTransaccion;
         this.precio = precio;
-        this.fechaCompra = LocalDateTime.now();
-        this.estado = "activo";
+        this.tipoBoleto = tipoBoleto;
+        this.estado = estado;
+        this.asiento = asiento;
     }
     
     public int getIdBoleto() { return idBoleto; }
@@ -29,8 +29,8 @@ public class Boleto {
     public int getIdFuncion() { return idFuncion; }
     public void setIdFuncion(int idFuncion) { this.idFuncion = idFuncion; }
     
-    public int getIdUsuario() { return idUsuario; }
-    public void setIdUsuario(int idUsuario) { this.idUsuario = idUsuario; }
+    public int getIdTransaccion() { return idTransaccion; }
+    public void setIdTransaccion(int idTransaccion) { this.idTransaccion = idTransaccion; }
     
     public String getAsiento() { return asiento; }
     public void setAsiento(String asiento) { this.asiento = asiento; }
@@ -38,8 +38,8 @@ public class Boleto {
     public BigDecimal getPrecio() { return precio; }
     public void setPrecio(BigDecimal precio) { this.precio = precio; }
     
-    public LocalDateTime getFechaCompra() { return fechaCompra; }
-    public void setFechaCompra(LocalDateTime fechaCompra) { this.fechaCompra = fechaCompra; }
+    public String getTipoBoleto() { return tipoBoleto; }
+    public void setTipoBoleto(String tipoBoleto) { this.tipoBoleto = tipoBoleto; }
     
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }

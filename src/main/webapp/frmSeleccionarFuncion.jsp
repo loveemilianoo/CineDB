@@ -221,7 +221,7 @@
                                     </small>
                                 </div>
                                 
-                                <form action="frmSeleccionarAsientos.jsp" method="GET">
+                                <form action="frmComprarBoletos.jsp" method="GET">
                                     <input type="hidden" name="idFuncion" value="<%= funcion.getIdFuncion() %>">
                                     <input type="hidden" name="idPelicula" value="<%= idPelicula %>">
                                     <input type="hidden" name="tituloPelicula" value="<%= tituloPelicula %>">
@@ -230,7 +230,7 @@
                                     <input type="hidden" name="idSala" value="<%= funcion.getIdSala() %>">
                                     <input type="hidden" name="numeroSala" value="<%= numeroSala %>">
                                     <button type="submit" class="btn btn-seleccionar w-100">
-                                        <i class="fa-solid fa-armchair me-2"></i>Seleccionar Asientos
+                                        <i class="fa-solid fa-armchair me-2"></i>Comprar boletos 
                                     </button>
                                 </form>
                             </div>
