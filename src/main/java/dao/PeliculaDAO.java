@@ -151,8 +151,6 @@ public class PeliculaDAO {
                 pelicula.setGenero(rs.getString("genero"));
                 pelicula.setClasificacion(rs.getString("clasificacion"));
             }
-            
-            
         } catch (SQLException e){
             System.out.println("Error "+e.toString());
             e.printStackTrace();
@@ -168,5 +166,37 @@ public class PeliculaDAO {
         return pelicula;
     }
     
+    public void updatePelicula(Pelicula pelicula){
+    Connection conn = null;
+    Conexion conexion = new Conexion();
+    PreparedStatement ps = null;
+
+    try{
+        conn = conexion.getConexion();
+        String query = "UPDATE tablas.pelicula SET titulo=?, duracion=?, genero=?, clasificacion=? WHERE id_pelicula=?";
+        ps = conn.prepareStatement(query);
+        
+        String duracionPostgres = formatDurationToPostgres(pelicula.getDuracion());
+        
+        ps.setString(1, pelicula.getTitulo());
+        ps.setString(2, duracionPostgres);
+        ps.setString(3, pelicula.getGenero());
+        ps.setString(4, pelicula.getClasificacion());
+        ps.setInt(5, pelicula.getIdPelicula());
+        ps.executeUpdate();
+        System.out.println("Película actualizada!!");
+        }catch (SQLException e){
+            System.out.println("Error "+e.toString());
+            e.printStackTrace();
+        } finally {
+            try{
+                if (ps != null) ps.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e){
+                System.out.println("Error en la base de datos "+e.toString());
+                e.printStackTrace();
+            }
+        }
+    } 
     
 }

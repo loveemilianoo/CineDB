@@ -92,34 +92,6 @@
             padding: 5px 10px;
             border-radius: 20px;
         }
-        .quantity-selector {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        .quantity-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 2px solid #dee2e6;
-            background: white;
-            font-size: 1.2rem;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .quantity-btn:hover {
-            border-color: #007bff;
-            color: #007bff;
-        }
-        .quantity-display {
-            font-size: 1.5rem;
-            font-weight: bold;
-            min-width: 50px;
-            text-align: center;
-        }
         .ticket-price {
             font-size: 1.5rem;
             font-weight: bold;
@@ -143,6 +115,76 @@
             height: 1px;
             background: #dee2e6;
             margin: 20px 0;
+        }
+        
+        /* ESTILO PARA EL SELECTOR DE CANTIDAD SIN JAVASCRIPT */
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .quantity-label {
+            font-weight: bold;
+            color: #495057;
+            margin-right: 15px;
+        }
+        .quantity-input-group {
+            display: flex;
+            align-items: center;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+        }
+        .quantity-btn {
+            width: 45px;
+            height: 45px;
+            border: none;
+            background: #f8f9fa;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #495057;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .quantity-btn:hover {
+            background: #e9ecef;
+            color: #007bff;
+        }
+        .quantity-btn:disabled {
+            background: #f8f9fa;
+            color: #adb5bd;
+            cursor: not-allowed;
+        }
+        .quantity-display {
+            width: 70px;
+            height: 45px;
+            border: none;
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #212529;
+            background: white;
+            pointer-events: none; /* Evita que el usuario escriba directamente */
+        }
+        .quantity-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        .max-tickets {
+            color: #dc3545;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -187,14 +229,13 @@
     BigDecimal precioNino = new BigDecimal("5.50");
     BigDecimal precioEstudiante = new BigDecimal("6.50");
     
-    // Inicializar cantidades
+    // Inicializar cantidades desde parámetros o inicializar en 0
     int cantidadGeneral = 0;
     int cantidadNino = 0;
     int cantidadEstudiante = 0;
     
-    // Procesar compra
+    // Si viene de un POST, obtener las cantidades
     if ("POST".equalsIgnoreCase(request.getMethod())) {
-        // Obtener cantidades del formulario
         String generalStr = request.getParameter("cantidadGeneral");
         String ninoStr = request.getParameter("cantidadNino");
         String estudianteStr = request.getParameter("cantidadEstudiante");
@@ -208,9 +249,58 @@
         if (estudianteStr != null && !estudianteStr.trim().isEmpty()) {
             cantidadEstudiante = Integer.parseInt(estudianteStr);
         }
+    } 
+    // Si viene de un GET, verificar si hay parámetros de ajuste
+    else if ("GET".equalsIgnoreCase(request.getMethod())) {
+        String ajusteGeneral = request.getParameter("ajusteGeneral");
+        String ajusteNino = request.getParameter("ajusteNino");
+        String ajusteEstudiante = request.getParameter("ajusteEstudiante");
         
-        int totalBoletos = cantidadGeneral + cantidadNino + cantidadEstudiante;
+        // Obtener valores actuales de la sesión si existen
+        Integer sesionGeneral = (Integer) session.getAttribute("cantidadGeneral");
+        Integer sesionNino = (Integer) session.getAttribute("cantidadNino");
+        Integer sesionEstudiante = (Integer) session.getAttribute("cantidadEstudiante");
         
+        if (sesionGeneral != null) cantidadGeneral = sesionGeneral;
+        if (sesionNino != null) cantidadNino = sesionNino;
+        if (sesionEstudiante != null) cantidadEstudiante = sesionEstudiante;
+        
+        // Aplicar ajustes desde los botones +/-
+        if (ajusteGeneral != null) {
+            if ("+".equals(ajusteGeneral)) {
+                cantidadGeneral++;
+            } else if ("-".equals(ajusteGeneral) && cantidadGeneral > 0) {
+                cantidadGeneral--;
+            }
+        }
+        
+        if (ajusteNino != null) {
+            if ("+".equals(ajusteNino)) {
+                cantidadNino++;
+            } else if ("-".equals(ajusteNino) && cantidadNino > 0) {
+                cantidadNino--;
+            }
+        }
+        
+        if (ajusteEstudiante != null) {
+            if ("+".equals(ajusteEstudiante)) {
+                cantidadEstudiante++;
+            } else if ("-".equals(ajusteEstudiante) && cantidadEstudiante > 0) {
+                cantidadEstudiante--;
+            }
+        }
+        
+        // Guardar en sesión para mantener los valores entre clics
+        session.setAttribute("cantidadGeneral", cantidadGeneral);
+        session.setAttribute("cantidadNino", cantidadNino);
+        session.setAttribute("cantidadEstudiante", cantidadEstudiante);
+    }
+    
+    // Calcular total de boletos seleccionados
+    int totalBoletos = cantidadGeneral + cantidadNino + cantidadEstudiante;
+    
+    // Procesar compra (solo cuando se presiona el botón de compra)
+    if ("POST".equalsIgnoreCase(request.getMethod()) && "comprar".equals(request.getParameter("accion"))) {
         // Verificar disponibilidad
         if (totalBoletos > 0 && totalBoletos <= asientosDisponibles) {
             // Generar asientos automáticamente
@@ -317,9 +407,21 @@
                             session.setAttribute("precioNino", precioNino);
                             session.setAttribute("precioEstudiante", precioEstudiante);
                             
-                            // Redirigir a transacción exitosa
-                            response.sendRedirect("frmTransaccion.jsp");
-                            return;
+                            // Limpiar cantidades de la sesión
+                            session.removeAttribute("cantidadGeneral");
+                            session.removeAttribute("cantidadNino");
+                            session.removeAttribute("cantidadEstudiante");
+                            
+                            // DEPURAR: Ver qué se está guardando en sesión
+    System.out.println("DEBUG: Guardado en sesión - tituloPelicula: " + tituloPelicula);
+    System.out.println("DEBUG: Guardado en sesión - fechaFuncion: " + fechaFuncion);
+    System.out.println("DEBUG: Guardado en sesión - horaFuncion: " + horaFuncion);
+    
+    // Redirigir a transacción exitosa
+    String redirectURL = "frmTransaccionBoleto.jsp?idTransaccion=" + idTransaccion;
+    System.out.println("DEBUG: Redirigiendo a: " + redirectURL);
+    response.sendRedirect(redirectURL);
+    return;
                         } else {
                             out.println("<div class='alert alert-danger alert-dismissible fade show' role='alert'>");
                             out.println("<i class='fa-solid fa-triangle-exclamation me-2'></i>");
@@ -357,6 +459,12 @@
             out.println("</div>");
         }
     }
+    
+    // Calcular subtotales y total para mostrar
+    BigDecimal subtotalGeneral = precioGeneral.multiply(new BigDecimal(cantidadGeneral));
+    BigDecimal subtotalNino = precioNino.multiply(new BigDecimal(cantidadNino));
+    BigDecimal subtotalEstudiante = precioEstudiante.multiply(new BigDecimal(cantidadEstudiante));
+    BigDecimal totalCompra = subtotalGeneral.add(subtotalNino).add(subtotalEstudiante);
     %>
     
     <!-- Navigation -->
@@ -414,7 +522,8 @@
                         <h4 class="mb-0"><i class="fa-solid fa-shopping-cart me-2"></i>Selecciona tus Boletos</h4>
                     </div>
                     <div class="ticket-body">
-                        <form method="post" action="frmComprarBoletos.jsp">
+                        <!-- Formulario para ajustar cantidades (botones +/-) -->
+                        <form method="get" action="frmComprarBoletos.jsp" class="mb-4">
                             <input type="hidden" name="idFuncion" value="<%= idFuncion %>">
                             <input type="hidden" name="idPelicula" value="<%= idPelicula %>">
                             <input type="hidden" name="tituloPelicula" value="<%= tituloPelicula %>">
@@ -434,16 +543,22 @@
                                 <p class="text-muted mb-3">
                                     <i class="fa-solid fa-user me-1"></i>Para mayores de 13 años
                                 </p>
-                                <div class="quantity-selector">
-                                    <button type="submit" name="cantidadGeneral" value="<%= Math.max(0, cantidadGeneral - 1) %>" 
-                                            class="quantity-btn" <%= cantidadGeneral == 0 ? "disabled" : "" %>>
-                                        <i class="fa-solid fa-minus"></i>
-                                    </button>
-                                    <span class="quantity-display"><%= cantidadGeneral %></span>
-                                    <button type="submit" name="cantidadGeneral" value="<%= cantidadGeneral + 1 %>" 
-                                            class="quantity-btn" <%= (cantidadGeneral + cantidadNino + cantidadEstudiante) >= asientosDisponibles ? "disabled" : "" %>>
-                                        <i class="fa-solid fa-plus"></i>
-                                    </button>
+                                
+                                <!-- SELECTOR DE CANTIDAD SIN JAVASCRIPT -->
+                                <div class="quantity-control">
+                                    <div class="quantity-label">Cantidad:</div>
+                                    <div class="quantity-input-group">
+                                        <button type="submit" name="ajusteGeneral" value="-" 
+                                                class="quantity-btn" <%= cantidadGeneral == 0 ? "disabled" : "" %>>
+                                            <i class="fa-solid fa-minus"></i>
+                                        </button>
+                                        <input type="text" class="quantity-display" 
+                                               value="<%= cantidadGeneral %>" readonly>
+                                        <button type="submit" name="ajusteGeneral" value="+"
+                                                class="quantity-btn" <%= totalBoletos >= asientosDisponibles ? "disabled" : "" %>>
+                                            <i class="fa-solid fa-plus"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             
@@ -459,16 +574,22 @@
                                 <p class="text-muted mb-3">
                                     <i class="fa-solid fa-child me-1"></i>Para niños de 3 a 12 años (con identificación)
                                 </p>
-                                <div class="quantity-selector">
-                                    <button type="submit" name="cantidadNino" value="<%= Math.max(0, cantidadNino - 1) %>" 
-                                            class="quantity-btn" <%= cantidadNino == 0 ? "disabled" : "" %>>
-                                        <i class="fa-solid fa-minus"></i>
-                                    </button>
-                                    <span class="quantity-display"><%= cantidadNino %></span>
-                                    <button type="submit" name="cantidadNino" value="<%= cantidadNino + 1 %>" 
-                                            class="quantity-btn" <%= (cantidadGeneral + cantidadNino + cantidadEstudiante) >= asientosDisponibles ? "disabled" : "" %>>
-                                        <i class="fa-solid fa-plus"></i>
-                                    </button>
+                                
+                                <!-- SELECTOR DE CANTIDAD SIN JAVASCRIPT -->
+                                <div class="quantity-control">
+                                    <div class="quantity-label">Cantidad:</div>
+                                    <div class="quantity-input-group">
+                                        <button type="submit" name="ajusteNino" value="-" 
+                                                class="quantity-btn" <%= cantidadNino == 0 ? "disabled" : "" %>>
+                                            <i class="fa-solid fa-minus"></i>
+                                        </button>
+                                        <input type="text" class="quantity-display" 
+                                               value="<%= cantidadNino %>" readonly>
+                                        <button type="submit" name="ajusteNino" value="+"
+                                                class="quantity-btn" <%= totalBoletos >= asientosDisponibles ? "disabled" : "" %>>
+                                            <i class="fa-solid fa-plus"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             
@@ -484,32 +605,50 @@
                                 <p class="text-muted mb-3">
                                     <i class="fa-solid fa-graduation-cap me-1"></i>Para estudiantes con carnet vigente
                                 </p>
-                                <div class="quantity-selector">
-                                    <button type="submit" name="cantidadEstudiante" value="<%= Math.max(0, cantidadEstudiante - 1) %>" 
-                                            class="quantity-btn" <%= cantidadEstudiante == 0 ? "disabled" : "" %>>
-                                        <i class="fa-solid fa-minus"></i>
-                                    </button>
-                                    <span class="quantity-display"><%= cantidadEstudiante %></span>
-                                    <button type="submit" name="cantidadEstudiante" value="<%= cantidadEstudiante + 1 %>" 
-                                            class="quantity-btn" <%= (cantidadGeneral + cantidadNino + cantidadEstudiante) >= asientosDisponibles ? "disabled" : "" %>>
-                                        <i class="fa-solid fa-plus"></i>
-                                    </button>
+                                
+                                <!-- SELECTOR DE CANTIDAD SIN JAVASCRIPT -->
+                                <div class="quantity-control">
+                                    <div class="quantity-label">Cantidad:</div>
+                                    <div class="quantity-input-group">
+                                        <button type="submit" name="ajusteEstudiante" value="-" 
+                                                class="quantity-btn" <%= cantidadEstudiante == 0 ? "disabled" : "" %>>
+                                            <i class="fa-solid fa-minus"></i>
+                                        </button>
+                                        <input type="text" class="quantity-display" 
+                                               value="<%= cantidadEstudiante %>" readonly>
+                                        <button type="submit" name="ajusteEstudiante" value="+"
+                                                class="quantity-btn" <%= totalBoletos >= asientosDisponibles ? "disabled" : "" %>>
+                                            <i class="fa-solid fa-plus"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             
-                            <div class="divider"></div>
+                            <!-- Información de límite -->
+                            <div class="quantity-info">
+                                <span><strong>Límite máximo:</strong> <span class="max-tickets"><%= asientosDisponibles %> boletos</span></span>
+                                <span><strong>Seleccionados:</strong> <%= totalBoletos %> boletos</span>
+                            </div>
+                        </form>
+                        
+                        <div class="divider"></div>
+                        
+                        <!-- Formulario para procesar la compra -->
+                        <form method="post" action="frmComprarBoletos.jsp">
+                            <input type="hidden" name="idFuncion" value="<%= idFuncion %>">
+                            <input type="hidden" name="idPelicula" value="<%= idPelicula %>">
+                            <input type="hidden" name="tituloPelicula" value="<%= tituloPelicula %>">
+                            <input type="hidden" name="fechaFuncion" value="<%= fechaFuncion %>">
+                            <input type="hidden" name="horaFuncion" value="<%= horaFuncion %>">
+                            <input type="hidden" name="idSala" value="<%= idSala %>">
+                            <input type="hidden" name="cantidadGeneral" value="<%= cantidadGeneral %>">
+                            <input type="hidden" name="cantidadNino" value="<%= cantidadNino %>">
+                            <input type="hidden" name="cantidadEstudiante" value="<%= cantidadEstudiante %>">
+                            <input type="hidden" name="accion" value="comprar">
                             
                             <!-- Resumen y total -->
                             <div class="total-section">
                                 <h5 class="mb-4"><i class="fa-solid fa-receipt me-2"></i>Resumen de Compra</h5>
-                                
-                                <% 
-                                BigDecimal subtotalGeneral = precioGeneral.multiply(new BigDecimal(cantidadGeneral));
-                                BigDecimal subtotalNino = precioNino.multiply(new BigDecimal(cantidadNino));
-                                BigDecimal subtotalEstudiante = precioEstudiante.multiply(new BigDecimal(cantidadEstudiante));
-                                BigDecimal totalCompra = subtotalGeneral.add(subtotalNino).add(subtotalEstudiante);
-                                int totalBoletos = cantidadGeneral + cantidadNino + cantidadEstudiante;
-                                %>
                                 
                                 <div class="row mb-3">
                                     <div class="col-md-6">
@@ -560,33 +699,33 @@
                             <!-- Botón de compra -->
                             <div class="text-center mt-5">
                                 <% if (totalBoletos > 0) { %>
-                                <!-- Agrega un input hidden para identificar la acción -->
-                                <input type="hidden" name="accion" value="comprar">
-    
-                                <button type="submit" class="btn btn-comprar btn-lg">
-                                <i class="fa-solid fa-credit-card me-2"></i>Procesar Compra
-                                </button>
-                                <p class="text-muted mt-2 small">
-                                    Al hacer clic, se procesará tu compra y se asignarán los asientos automáticamente.
-                                </p>
+                                    <button type="submit" class="btn btn-comprar btn-lg">
+                                        <i class="fa-solid fa-credit-card me-2"></i>Procesar Compra
+                                    </button>
+                                    <p class="text-muted mt-2 small">
+                                        Al hacer clic, se procesará tu compra y se asignarán los asientos automáticamente.
+                                    </p>
                                 <% } else { %>
-                            <div class="alert alert-warning">
-                                <i class="fa-solid fa-exclamation-triangle me-2"></i>
-                                    Selecciona al menos un boleto para continuar
-                            </div>
+                                    <div class="alert alert-warning">
+                                        <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                                        Selecciona al menos un boleto para continuar
+                                    </div>
                                 <% } %>
                             </div>
+                        </form>
                 
-                <!-- Información adicional -->
-                <div class="card border-0 shadow-sm mt-4">
-                    <div class="card-body">
-                        <h5><i class="fa-solid fa-lightbulb me-2 text-warning"></i>Políticas de los boletos</h5>
-                        <ul class="mt-3 mb-0">
-                            <li class="mb-2"><strong>Boleto Niño:</strong> Requiere identificación que acredite la edad (3-12 años)</li>
-                            <li class="mb-2"><strong>Boleto Estudiante:</strong> Requiere carnet estudiantil vigente</li>
-                            <li class="mb-2">Los boletos no son reembolsables ni transferibles</li>
-                            <li>Presenta tu código de confirmación en taquilla 15 minutos antes</li>
-                        </ul>
+                        <!-- Información adicional -->
+                        <div class="card border-0 shadow-sm mt-4">
+                            <div class="card-body">
+                                <h5><i class="fa-solid fa-lightbulb me-2 text-warning"></i>Políticas de los boletos</h5>
+                                <ul class="mt-3 mb-0">
+                                    <li class="mb-2"><strong>Boleto Niño:</strong> Requiere identificación que acredite la edad (3-12 años)</li>
+                                    <li class="mb-2"><strong>Boleto Estudiante:</strong> Requiere carnet estudiantil vigente</li>
+                                    <li class="mb-2">Los boletos no son reembolsables ni transferibles</li>
+                                    <li>Presenta tu código de confirmación en taquilla 15 minutos antes</li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
