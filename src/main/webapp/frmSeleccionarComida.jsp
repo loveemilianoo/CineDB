@@ -155,7 +155,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Seleccionar Comida - Cine</title>
+    <title>Seleccionar Comida - Cine Prototyoe</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -254,15 +254,31 @@
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+     <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
         <div class="container">
             <a class="navbar-brand" href="frmMenu.jsp">
                 <i class="fa-solid fa-film me-2"></i>Cine
             </a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="frmMenu.jsp"><i class="fa-solid fa-home me-1"></i>Inicio</a>
-                <a class="nav-link" href="frmSeleccionarPelicula.jsp"><i class="fa-solid fa-ticket me-1"></i>Boletos</a>
-                <a class="nav-link active" href="frmSeleccionarComidaSimple.jsp"><i class="fa-solid fa-popcorn me-1"></i>Comida</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="nav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="frmMenu.jsp"><i class="fa-solid fa-home me-1"></i>Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link" href="frmSeleccionarPelicula.jsp"><i class="fa-solid fa-ticket me-1"></i>Boletos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="fa-solid fa-popcorn me-1"></i>Comida</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link active dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fa-solid fa-sliders me-1"></i>Administrar
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="frmListadoPeliculas.jsp"><i class="fa-solid fa-film me-2"></i>Películas</a></li>
+                            <li><a class="dropdown-item active" href="frmListadoProductoSinStock.jsp"><i class="fa-solid fa-tags me-2"></i>Productos</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fa-solid fa-calendar me-2"></i>Funciones</a></li>
+                            <li><a class="dropdown-item" href="frmListadoBoletos.jsp"><i class="fa-solid fa-ticket me-2"></i>Boletos</a></li>
+                        </ul>
+                    </li>
+                </ul>
             </div>
         </div>
     </nav>
@@ -271,7 +287,7 @@
         <div class="container">
             <div class="text-center">
                 <h1 class="display-4 fw-bold mb-3">Seleccionar Comida</h1>
-                <p class="lead mb-0">Selecciona tus productos favoritos (versión simple)</p>
+                <p class="lead mb-0">Selecciona tus productos favoritos</p>
             </div>
         </div>
     </header>
@@ -346,7 +362,7 @@
                                 </p>
                                 
                                 <!-- Formulario para agregar -->
-                                <form method="POST" action="frmSeleccionarComidaSimple.jsp">
+                                <form method="POST" action="frmSeleccionarComida.jsp">
                                     <input type="hidden" name="accion" value="agregar">
                                     <input type="hidden" name="idProducto" value="<%= producto.getIdProducto() %>">
                                     
@@ -389,7 +405,7 @@
                         <h5 class="mb-3">
                             <i class="fa-solid fa-user me-2"></i>Datos del Cliente
                         </h5>
-                        <form method="POST" action="frmSeleccionarComidaSimple.jsp" id="formPedido">
+                        <form method="POST" action="frmSeleccionarComida.jsp" id="formPedido">
                             <input type="hidden" name="accion" value="comprar">
                             
                             <div class="mb-3">
@@ -419,7 +435,7 @@
                             <!-- Botón de limpiar carrito (solo si hay items) -->
                             <% if(!carrito.isEmpty()) { %>
                             <div class="d-flex justify-content-between mb-3">
-                                <form method="POST" action="frmSeleccionarComidaSimple.jsp" class="d-inline">
+                                <form method="POST" action="frmSeleccionarComida.jsp" class="d-inline">
                                     <input type="hidden" name="accion" value="limpiar">
                                     <button type="submit" class="btn btn-outline-danger btn-sm">
                                         <i class="fa-solid fa-trash me-1"></i>Vaciar Carrito
@@ -463,7 +479,7 @@
                                     <h6 class="mb-1"><%= producto.getNombre() %></h6>
                                     <p class="text-muted small mb-0">Q<%= String.format("%.2f", producto.getPrecioVenta()) %> c/u</p>
                                 </div>
-                                <form method="POST" action="frmSeleccionarComidaSimple.jsp" class="d-inline">
+                                <form method="POST" action="frmSeleccionarComida.jsp" class="d-inline">
                                     <input type="hidden" name="accion" value="eliminar">
                                     <input type="hidden" name="idProducto" value="<%= producto.getIdProducto() %>">
                                     <button type="submit" class="btn btn-outline-danger btn-sm">
@@ -474,7 +490,7 @@
                             
                             <!-- Control de cantidad -->
                             <div class="d-flex justify-content-between align-items-center mt-2">
-                                <form method="POST" action="frmSeleccionarComidaSimple.jsp" class="d-flex align-items-center">
+                                <form method="POST" action="frmSeleccionarComida.jsp" class="d-flex align-items-center">
                                     <input type="hidden" name="accion" value="actualizar">
                                     <input type="hidden" name="idProducto" value="<%= producto.getIdProducto() %>">
                                     <span class="me-2">Cantidad:</span>
@@ -521,14 +537,6 @@
                         </div>
                     </div>
                     <% } %>
-                    
-                    <!-- Enlace a versión con stock -->
-                    <div class="mt-4 text-center">
-                        <a href="frmSeleccionarComida.jsp" class="text-decoration-none">
-                            <i class="fa-solid fa-boxes-stacked me-1"></i>
-                            Usar versión con control de stock
-                        </a>
-                    </div>
                 </div>
             </div>
         </div>
@@ -546,7 +554,7 @@
                         <a href="frmSeleccionarPelicula.jsp" class="btn btn-outline-light btn-sm">
                             <i class="fa-solid fa-ticket me-1"></i>Boletos
                         </a>
-                        <a href="frmSeleccionarComidaSimple.jsp" class="btn btn-outline-light btn-sm">
+                        <a href="frmSeleccionarComida.jsp" class="btn btn-outline-light btn-sm">
                             <i class="fa-solid fa-popcorn me-1"></i>Comida
                         </a>
                         <a href="frmMenu.jsp" class="btn btn-outline-light btn-sm">
