@@ -116,7 +116,7 @@
                     // Limpiar carrito después de la compra
                     carrito.clear();
                     
-                    mensaje = "¡Pedido realizado exitosamente! Total: Q" + String.format("%.2f", total);
+                    mensaje = "¡Pedido realizado exitosamente! Total: $" + String.format("%.2f", total);
                     tipoMensaje = "success";
                 }
             } catch(Exception e) {
@@ -266,7 +266,7 @@
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="frmMenu.jsp"><i class="fa-solid fa-home me-1"></i>Inicio</a></li>
                     <li class="nav-item"><a class="nav-link" href="frmSeleccionarPelicula.jsp"><i class="fa-solid fa-ticket me-1"></i>Boletos</a></li>
-                    <li class="nav-item"><a class="nav-link" href="frmSeleccionarComida"><i class="fa-solid fa-popcorn me-1"></i>Comida</a></li>
+                    <li class="nav-item"><a class="nav-link" href="frmSeleccionarComida.jsp"><i class="fa-solid fa-popcorn me-1"></i>Comida</a></li>
                     <li class="nav-item dropdown">
                         <a class="nav-link active dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                             <i class="fa-solid fa-sliders me-1"></i>Administrar
@@ -345,7 +345,7 @@
                                 <i class="fa-solid <%= icono %> fa-4x <%= disponible ? "text-success" : "text-muted" %>"></i>
                                 <span class="badge <%= disponible ? "bg-success" : "bg-secondary" %>" 
                                       style="position: absolute; top: 10px; right: 10px;">
-                                    Q<%= String.format("%.2f", producto.getPrecioVenta()) %>
+                                    $<%= String.format("%.2f", producto.getPrecioVenta()) %>
                                 </span>
                             </div>
                             <div class="card-body">
@@ -432,28 +432,23 @@
                                 </select>
                             </div>
                             
-                            <!-- Botón de limpiar carrito (solo si hay items) -->
                             <% if(!carrito.isEmpty()) { %>
                             <div class="d-flex justify-content-between mb-3">
-                                <form method="POST" action="frmSeleccionarComida.jsp" class="d-inline">
-                                    <input type="hidden" name="accion" value="limpiar">
-                                    <button type="submit" class="btn btn-outline-danger btn-sm">
-                                        <i class="fa-solid fa-trash me-1"></i>Vaciar Carrito
-                                    </button>
-                                </form>
+                                <button type="button" 
+                                        onclick="if(confirm('¿Estás seguro de vaciar el carrito?')) { document.getElementById('formLimpiar').submit(); }" 
+                                        class="btn btn-outline-danger btn-sm">
+                                    <i class="fa-solid fa-trash me-1"></i>Vaciar Carrito
+                                </button>
+
                                 <button type="submit" form="formPedido" class="btn btn-success">
                                     <i class="fa-solid fa-check-circle me-1"></i>Confirmar Pedido
                                 </button>
                             </div>
-                            <% } else { %>
-                            <div class="text-center">
-                                <p class="text-muted mb-0">
-                                    <i class="fa-solid fa-info-circle me-1"></i>
-                                    Agrega productos al carrito para continuar
-                                </p>
-                            </div>
                             <% } %>
                         </form>
+                        <form method="POST" action="frmSeleccionarComida.jsp" id="formLimpiar" style="display: none;">
+                            <input type="hidden" name="accion" value="limpiar">
+                         </form>
                     </div>
                     
                     <!-- Contenido del carrito -->
