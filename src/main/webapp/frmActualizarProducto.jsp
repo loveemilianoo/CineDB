@@ -3,6 +3,9 @@
 <%@page import="java.math.BigDecimal"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
+    // ============================================
+    // 1. OBTENER ID DEL PRODUCTO A EDITAR
+    // ============================================
     String idParam = request.getParameter("id");
     Producto producto = null;
     ProductoDAO dao = new ProductoDAO();
@@ -12,9 +15,13 @@
             int idProducto = Integer.parseInt(idParam);
             producto = dao.getProductoPorId(idProducto);
         } catch (NumberFormatException e) {
+            // ID inválido
         }
     }
     
+    // ============================================
+    // 2. PROCESAR ACTUALIZACIÓN
+    // ============================================
     String mensaje = "";
     String tipoMensaje = "";
     
@@ -22,17 +29,18 @@
         try {
             String nombre = request.getParameter("nombre");
             String precioStr = request.getParameter("precio");
-            String disponible = request.getParameter("disponible");
+            String stockStr = request.getParameter("stock");
             String idStr = request.getParameter("idProducto");
             
             // Validar campos obligatorios
             if(nombre != null && !nombre.trim().isEmpty() &&
                precioStr != null && !precioStr.trim().isEmpty() &&
+               stockStr != null && !stockStr.trim().isEmpty() &&
                idStr != null && !idStr.trim().isEmpty()) {
                 
                 int idProducto = Integer.parseInt(idStr);
                 BigDecimal precio = new BigDecimal(precioStr);
-                int stock = "si".equals(disponible) ? 1 : 0;
+                int stock = Integer.parseInt(stockStr);
                 
                 // Crear objeto Producto con los datos actualizados
                 Producto productoActualizado = new Producto(idProducto, nombre, precio, stock);
@@ -59,6 +67,9 @@
         }
     }
     
+    // ============================================
+    // 3. REDIRIGIR SI NO HAY PRODUCTO
+    // ============================================
     if(producto == null && !"POST".equals(request.getMethod())) {
         response.sendRedirect("frmListadoProducto.jsp");
         return;
@@ -69,7 +80,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Editar Producto - Cine Prototype</title>
+    <title>Actualizar Producto - Cine Prototype</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -102,19 +113,6 @@
             border-color: #667eea;
             box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
         }
-        .availability-badge {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
-        .available-badge {
-            background-color: #28a745;
-        }
-        .unavailable-badge {
-            background-color: #dc3545;
-        }
         .simple-form {
             background-color: #f8f9fa;
             border-radius: 10px;
@@ -125,6 +123,23 @@
             padding: 10px 15px;
             border-radius: 5px;
             margin-bottom: 20px;
+        }
+        .stock-indicator {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .stock-high { background-color: #28a745; }
+        .stock-low { background-color: #fd7e14; }
+        .stock-zero { background-color: #dc3545; }
+        .stock-info-box {
+            background-color: #e9f7ef;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 10px;
+            border-left: 4px solid #28a745;
         }
     </style>
 </head>
@@ -142,7 +157,7 @@
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="frmMenu.jsp"><i class="fa-solid fa-home me-1"></i>Inicio</a></li>
                     <li class="nav-item"><a class="nav-link" href="frmSeleccionarPelicula.jsp"><i class="fa-solid fa-ticket me-1"></i>Boletos</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="fa-solid fa-popcorn me-1"></i>Comida</a></li>
+                    <li class="nav-item"><a class="nav-link" href="frmSeleccionarComida.jsp"><i class="fa-solid fa-popcorn me-1"></i>Comida</a></li>
                     <li class="nav-item dropdown">
                         <a class="nav-link active dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                             <i class="fa-solid fa-sliders me-1"></i>Administrar
@@ -192,7 +207,19 @@
                         <h2 class="card-title text-center mb-4">Información del Producto</h2>
                         
                         <!-- Información del ID -->
-                        <% if(producto != null) { %>
+                        <% if(producto != null) { 
+                            // Determinar color del indicador de stock
+                            String stockClass = "stock-zero";
+                            String stockTexto = "Sin stock";
+
+                            if(producto.getStock() > 5) {
+                                stockClass = "stock-high";
+                                stockTexto = "Disponible";
+                            } else if(producto.getStock() > 0) {
+                                stockClass = "stock-low";
+                                stockTexto = "Stock bajo";
+                            }
+                        %>
                         <div class="product-id">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
@@ -201,8 +228,8 @@
                                     <span class="badge bg-secondary ms-2">#<%= producto.getIdProducto() %></span>
                                 </div>
                                 <div>
-                                    <i class="fa-solid fa-boxes-stacked me-1"></i>
-                                    <small>Stock actual: <%= producto.getStock() %></small>
+                                    <span class="stock-indicator <%= stockClass %>"></span>
+                                    <span class="fw-bold"><%= stockTexto %></span>
                                 </div>
                             </div>
                         </div>
@@ -246,53 +273,66 @@
                                     </div>
                                 </div>
                                 
-                                <!-- Disponibilidad (Sí/No) -->
+                                <!-- STOCK (Cantidad) -->
                                 <div class="mb-4">
-                                    <label class="form-label fw-bold d-block mb-3">
-                                        <i class="fa-solid fa-circle-check me-2"></i>Disponibilidad
+                                    <label for="stock" class="form-label required-field fw-bold">
+                                        <i class="fa-solid fa-boxes-stacked me-2"></i>Cantidad en Stock
                                     </label>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" 
-                                               type="radio" 
-                                               name="disponible" 
-                                               id="disponibleSi" 
-                                               value="si" 
-                                               <%= producto != null && producto.getStock() > 0 ? "checked" : "" %>>
-                                        <label class="form-check-label" for="disponibleSi">
-                                            <span class="availability-badge available-badge"></span>
-                                            Disponible
-                                        </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fa-solid fa-cube"></i>
+                                        </span>
+                                        <input type="number" 
+                                               class="form-control" 
+                                               id="stock" 
+                                               name="stock" 
+                                               required
+                                               min="0"
+                                               value="<%= producto != null ? producto.getStock() : "0" %>"
+                                               placeholder="0">
+                                        <span class="input-group-text">unidades</span>
                                     </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" 
-                                               type="radio" 
-                                               name="disponible" 
-                                               id="disponibleNo" 
-                                               value="no"
-                                               <%= producto != null && producto.getStock() == 0 ? "checked" : "" %>>
-                                        <label class="form-check-label" for="disponibleNo">
-                                            <span class="availability-badge unavailable-badge"></span>
-                                            No disponible
-                                        </label>
+                                    <div class="form-text">
+                                        Ingresa la cantidad disponible en inventario.
                                     </div>
-                                    <div class="form-text mt-2">
-                                        Indica si el producto está disponible para la venta.
-                                        <br>
+                                    
+                                    <!-- Información sobre niveles de stock -->
+                                    <div class="stock-info-box">
+                                        <h6 class="fw-bold">
+                                            <i class="fa-solid fa-chart-line me-2"></i>Niveles de Stock:
+                                        </h6>
+                                        <ul class="list-unstyled mb-0">
+                                            <li>
+                                                <span class="stock-indicator stock-high"></span>
+                                                <strong>Disponible:</strong> Más de 5 unidades
+                                            </li>
+                                            <li>
+                                                <span class="stock-indicator stock-low"></span>
+                                                <strong>Stock Bajo:</strong> Entre 1 y 5 unidades
+                                            </li>
+                                            <li>
+                                                <span class="stock-indicator stock-zero"></span>
+                                                <strong>Sin Stock:</strong> 0 unidades
+                                            </li>
+                                        </ul>
                                     </div>
                                 </div>
                                 
                                 <!-- Información adicional -->
-                                <% if(producto != null) { %>
+                                <% if(producto != null) { 
+                                    BigDecimal valorTotal = producto.getPrecioVenta().multiply(new BigDecimal(producto.getStock()));
+                                %>
                                 <div class="alert alert-info">
                                     <div class="d-flex">
                                         <div class="me-3">
-                                            <i class="fa-solid fa-clock-rotate-left fa-2x"></i>
+                                            <i class="fa-solid fa-calculator fa-2x"></i>
                                         </div>
                                         <div>
-                                            <h6 class="alert-heading">Información de registro</h6>
+                                            <h6 class="alert-heading">Resumen del inventario</h6>
                                             <p class="mb-0 small">
-                                                Este producto fue registrado con ID #<%= producto.getIdProducto() %>.
-                                                Última actualización: <%= new java.util.Date() %>
+                                                <strong>Stock actual:</strong> <%= producto.getStock() %> unidades<br>
+                                                <strong>Precio unitario:</strong> $<%= String.format("%.2f", producto.getPrecioVenta()) %><br>
+                                                <strong>Valor total del stock:</strong> $<%= String.format("%.2f", valorTotal) %>
                                             </p>
                                         </div>
                                     </div>
