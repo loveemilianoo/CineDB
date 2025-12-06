@@ -113,14 +113,14 @@
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="frmMenu.jsp"><i class="fa-solid fa-home me-1"></i>Inicio</a></li>
                     <li class="nav-item"><a class="nav-link" href="frmSeleccionarPelicula.jsp"><i class="fa-solid fa-ticket me-1"></i>Boletos</a></li>
-                    <li class="nav-item"><a class="nav-link" href="frmSeleccionarComida.jsp"><i class="fa-solid fa-popcorn me-1"></i>Comida</a></li>
+                    <li class="nav-item"><a class="nav-link" href="frmSeleccionarComida.jsp"><i class="fa-solid fa-utensils me-1"></i>Comida</a></li>
                     <li class="nav-item dropdown">
                         <a class="nav-link active dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                             <i class="fa-solid fa-sliders me-1"></i>Administrar
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="frmListadoPeliculas.jsp"><i class="fa-solid fa-film me-2"></i>Películas</a></li>
-                            <li><a class="dropdown-item" href="frmListadoProducto.jsp"><i class="fa-solid fa-tags me-2"></i>Productos</a></li>
+                            <li><a class="dropdown-item" href="frmListadoProducto.jsp"><i class="fa-solid fa-pizza-slice me-2"></i>Productos</a></li>
                             <li><a class="dropdown-item" href="frmSeleccionarFuncion.jsp"><i class="fa-solid fa-calendar me-2"></i>Funciones</a></li>
                             <li><a class="dropdown-item" href="frmListadoBoletos.jsp"><i class="fa-solid fa-ticket me-2"></i>Boletos</a></li>
                         </ul>
@@ -262,7 +262,7 @@
                             <i class="fa-solid fa-ticket me-1"></i>Boletos
                         </a>
                         <a href="frmListadoProducto.jsp" class="btn btn-outline-light btn-sm">
-                            <i class="fa-solid fa-popcorn me-1"></i>Productos
+                            <i class="fa-solid fa-utensils me-1"></i>Productos
                         </a>
                         <a href="frmMenu.jsp" class="btn btn-outline-light btn-sm">
                             <i class="fa-solid fa-home me-1"></i>Inicio

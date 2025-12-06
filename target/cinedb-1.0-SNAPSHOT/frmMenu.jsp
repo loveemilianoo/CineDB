@@ -116,7 +116,7 @@
           <div class="card action-card h-100 text-center border-success">
             <div class="card-body p-4">
               <div class="action-icon text-success">
-                <i class="fa-solid fa-popcorn"></i>
+                <i class="fa-solid fa-utensils"></i>
               </div>
               <h3 class="card-title mb-3">Comprar Comida</h3>
               <p class="card-text text-muted mb-4">
@@ -170,7 +170,7 @@
                 <i class="fa-solid fa-ticket me-1"></i>Boletos
               </a>
               <a href="frmSeleccionarComida.jsp" class="btn btn-outline-light btn-sm">
-                <i class="fa-solid fa-popcorn me-1"></i>Comida
+                <i class="fa-solid fa-utensils me-1"></i>Comida
               </a>
               <a href="frmListadoPeliculas.jsp" class="btn btn-outline-light btn-sm">
                 <i class="fa-solid fa-sliders me-1"></i>Administrar
