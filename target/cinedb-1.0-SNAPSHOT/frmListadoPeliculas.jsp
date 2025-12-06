@@ -1,8 +1,31 @@
-<%@page import="java.time.Duration" %>
 <%@page import="dao.PeliculaDAO" %>
 <%@page import="entity.Pelicula" %>
 <%@page import="java.util.List" %>
+<%@page import="java.time.Duration" %>
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
+<%
+// Procesar eliminación si existe el parámetro
+String action = request.getParameter("action");
+if ("delete".equals(action)) {
+    String idParam = request.getParameter("id");
+    if (idParam != null && !idParam.isEmpty()) {
+        try {
+            int idPelicula = Integer.parseInt(idParam);
+            PeliculaDAO dao = new PeliculaDAO();
+            dao.eliminarPelicula(idPelicula);
+            
+            // Redirigir para evitar reenvío del formulario
+            response.sendRedirect("frmListadoPeliculas.jsp?deleted=true");
+            return;
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+// Procesar mensaje de confirmación
+String deleted = request.getParameter("deleted");
+%>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -45,6 +68,14 @@
 </head>
 
 <body>
+  <!-- Mensaje de éxito para eliminación -->
+  <% if ("true".equals(deleted)) { %>
+  <div class="alert alert-success alert-dismissible fade show m-3" role="alert">
+    <i class="fa-solid fa-check-circle me-2"></i>Película eliminada correctamente.
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  <% } %>
+  
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
       <a class="navbar-brand" href="frmMenu.jsp">
@@ -168,6 +199,8 @@
                         badgeClass = "warning";
                     } else if ("R".equals(clasificacion)) {
                         badgeClass = "danger";
+                    } else if ("B".equals(clasificacion)) {
+                        badgeClass = "dark";
                     }
                     %>
                     <span class="badge bg-<%= badgeClass %>">
@@ -185,8 +218,8 @@
                       </a>
                       <a href="frmListadoPeliculas.jsp?action=delete&id=<%= pelicula.getIdPelicula() %>" 
                         class="btn btn-outline-danger"
-                        onclick="return confirm('¿Estás seguro de que deseas eliminar la película <%= pelicula.getTitulo() %>?')">
-                      <i class="fa-solid fa-trash me-1"></i>Eliminar
+                        onclick="return confirm('¿Estás seguro de que deseas eliminar la película \'<%= pelicula.getTitulo() %>\'?')">
+                        <i class="fa-solid fa-trash me-1"></i>Eliminar
                       </a>
                     </div>
                   </td>
@@ -206,7 +239,7 @@
       <div class="col-md-6">
         <div class="d-flex align-items-center">
           <span class="text-muted me-3">
-
+            Total: <%= peliculas.size() %> película(s)
           </span>
         </div>
       </div>
@@ -245,7 +278,6 @@
         </div>
       </div>
       <hr class="my-3">
-
     </div>
   </footer>
 
