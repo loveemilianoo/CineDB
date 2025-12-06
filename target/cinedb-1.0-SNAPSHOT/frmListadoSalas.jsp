@@ -14,7 +14,7 @@
     if ("delete".equals(action)) {
         int id = Integer.parseInt(request.getParameter("id"));
         new SalaDAO().eliminarSala(id);
-        response.sendRedirect("frmListadoSala.jsp");
+        response.sendRedirect("frmListadoSalas.jsp");
         return;
     }
 
@@ -50,7 +50,7 @@
             <td><%= s.getCapacidad() %></td>
             <td>
                 <a href="frmEditarSala.jsp?id=<%=s.getIdSala()%>">Editar</a> |
-                <a href="frmListadoSala.jsp?action=delete&id=<%=s.getIdSala()%>"
+                <a href="frmListadoSalas.jsp?action=delete&id=<%=s.getIdSala()%>"
                    onclick="return confirm('¿Eliminar sala?');">Eliminar</a>
             </td>
         </tr>

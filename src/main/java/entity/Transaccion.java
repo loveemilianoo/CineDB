@@ -9,10 +9,10 @@ public class Transaccion {
     private BigDecimal total;
     private String metodoPago;
     
-    public Transaccion(){}
+    public Transaccion(){this.fechaHora = LocalDateTime.now(); }
     public Transaccion(int idTransaccion, LocalDateTime fechaHora, BigDecimal total, String metodoPago) {
         this.idTransaccion = idTransaccion;
-        this.fechaHora = fechaHora;
+        this.fechaHora = fechaHora != null ? fechaHora : LocalDateTime.now();
         this.total = total;
         this.metodoPago = metodoPago;
     }
