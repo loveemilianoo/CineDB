@@ -131,7 +131,7 @@
         <div class="container">
             <div class="hero-content">
                 <h1 class="display-4 fw-bold mb-3">Nuevo Producto</h1>
-                <p class="lead mb-0">Agrega un producto al catálogo (versión simplificada)</p>
+                <p class="lead mb-0">Agrega un producto al catálogo</p>
             </div>
         </div>
     </header>
@@ -228,34 +228,6 @@
                                     </div>
                                 </div>
                             </form>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Comparación de versiones -->
-                <div class="row mt-4">
-                    <div class="col-md-6">
-                        <div class="card border-primary h-100">
-                            <div class="card-body">
-                                <h5 class="card-title">
-                                    <i class="fa-solid fa-boxes-stacked text-primary me-2"></i>Versión Completa
-                                </h5>
-                                <p class="card-text">Incluye control de inventario, stock y alertas.</p>
-                                <a href="frmGuardaProducto.jsp" class="btn btn-outline-primary btn-sm">
-                                    Usar versión con stock
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card border-success h-100">
-                            <div class="card-body">
-                                <h5 class="card-title">
-                                    <i class="fa-solid fa-check-circle text-success me-2"></i>Versión Simplificada
-                                </h5>
-                                <p class="card-text">Solo nombre, precio y disponibilidad. Menos mantenimiento.</p>
-                                <span class="badge bg-success">Actual</span>
-                            </div>
                         </div>
                     </div>
                 </div>

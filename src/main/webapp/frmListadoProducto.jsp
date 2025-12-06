@@ -214,14 +214,6 @@
                 </div>
                 <% } %>
             </div>
-            <div class="col-md-4 text-end">
-                <div class="btn-group">
-                    <a href="frmListadoProductoSinStock.jsp" 
-                       class="btn <%= buscar == null ? "btn-primary" : "btn-outline-primary" %>">
-                       Todos los Productos
-                    </a>
-                </div>
-            </div>
         </div>
 
         <!-- Estadísticas simplificadas -->
@@ -237,28 +229,6 @@
                             </div>
                             <div class="icon-circle bg-primary text-white">
                                 <i class="fa-solid fa-boxes"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card stats-card border-start border-info border-4">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="text-muted mb-0">Acciones Disponibles</h6>
-                                <div class="mt-2">
-                                    <a href="frmInsertaProducto.jsp" class="btn btn-sm btn-success me-2">
-                                        <i class="fa-solid fa-plus me-1"></i>Agregar
-                                    </a>
-                                    <a href="frmListadoProducto.jsp" class="btn btn-sm btn-outline-secondary">
-                                        <i class="fa-solid fa-boxes-stacked me-1"></i>Ver con Stock
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="icon-circle bg-info text-white">
-                                <i class="fa-solid fa-gear"></i>
                             </div>
                         </div>
                     </div>
