@@ -17,7 +17,6 @@
                 BigDecimal precio = new BigDecimal(precioStr);
                 int stock = "si".equals(disponible) ? 1 : 0;
                 
-                // CORRECCIÓN: Usar constructor con parámetros
                 // ID temporal = 0, la BD generará el real
                 Producto producto = new Producto(0, nombre, precio, stock);
                 
@@ -116,7 +115,7 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="frmListadoPeliculas.jsp"><i class="fa-solid fa-film me-2"></i>Películas</a></li>
-                            <li><a class="dropdown-item" href="frmListadoProductoSinStock.jsp"><i class="fa-solid fa-tags me-2"></i>Productos</a></li>
+                            <li><a class="dropdown-item" href="frmListadoProducto.jsp"><i class="fa-solid fa-tags me-2"></i>Productos</a></li>
                             <li><a class="dropdown-item" href="#"><i class="fa-solid fa-calendar me-2"></i>Funciones</a></li>
                             <li><a class="dropdown-item" href="frmListadoBoletos.jsp"><i class="fa-solid fa-ticket me-2"></i>Boletos</a></li>
                         </ul>
@@ -148,7 +147,7 @@
                         <h2 class="card-title text-center mb-4">Información Básica del Producto</h2>
                         
                         <div class="simple-form">
-                            <form method="POST" action="frmGuardaProducto.jsp">
+                            <form method="POST" action="frmInsertaProducto.jsp">
                                 <!-- Nombre del Producto -->
                                 <div class="mb-4">
                                     <label for="nombre" class="form-label required-field fw-bold">
