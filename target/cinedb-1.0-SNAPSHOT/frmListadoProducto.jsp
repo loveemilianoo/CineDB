@@ -286,6 +286,9 @@
                             <td><span class="badge bg-secondary">#<%= producto.getIdProducto() %></span></td>
                             <td>
                                 <strong><%= producto.getNombre() %></strong>
+                                <% if(producto.getStock() > 0 && producto.getStock() <= 5) { %>
+                                <span class="badge bg-warning ms-2">Pocas unidades</span>
+                                <% } %>
                             </td>
                             <td>
                                 <span class="fw-bold text-primary">$<%= String.format("%.2f", producto.getPrecioVenta()) %></span>
